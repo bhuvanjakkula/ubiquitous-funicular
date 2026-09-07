@@ -284,7 +284,7 @@ def test_fixture_headers_stable():
 def test_detector_placeholders_are_not_ingest_fixtures():
     from conftest import INGEST_FIXTURES
     shared = json.loads((FIXTURES / "happy/job.json").read_text())
-    for name in ("d1_opening_break", "d2_edited_after_clear", "d3_duplicate", "d5_after_close"):
+    for name in ("d2_edited_after_clear", "d3_duplicate", "d5_after_close"):
         folder = FIXTURES / name
         assert {p.name for p in folder.iterdir()} == {"README.md", "job.json"}
         assert (folder / "README.md").read_text().strip() == "Filled on the detector day. Do not ingest in Day 4 tests."

@@ -11,7 +11,7 @@ from ledgertrace.ingest.job_config import load_job_config
 from ledgertrace.ingest.service import ingest_job
 
 fixtures_dir = Path(__file__).parent / "fixtures"
-INGEST_FIXTURES = frozenset({"happy", "d4_unmatched", "unbalanced_je", "alias_headers"})
+INGEST_FIXTURES = frozenset({"happy", "d4_unmatched", "unbalanced_je", "alias_headers", "d1_opening_break"})
 
 
 @pytest.fixture
@@ -32,7 +32,7 @@ def session(engine):
 
 def ingest_fixture(name: str, session: Session) -> Job:
     if name not in INGEST_FIXTURES:
-        raise ValueError(f"{name} is not an ingest-ready Day 4 fixture")
+        raise ValueError(f"{name} is not an ingest-ready fixture")
     folder = fixtures_dir / name
     return ingest_job(
         session, folder / "bank.csv", folder / "gl.csv",

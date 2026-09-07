@@ -1,4 +1,10 @@
-"""Sparse, deterministic cash replay; supplied opening is as of period start."""
+"""Sparse cash replay; supplied opening is as of period start.
+
+Future Day 7 D1 must use opening_basis, not raw implied opening:
+UNKNOWN when expected opening is absent; otherwise FAIL only if mode is
+books_preperiod and its value differs from the claim. Claimed mode has no
+pre-period cash evidence to contradict the claim. No detector runs here.
+"""
 from dataclasses import asdict, dataclass
 from itertools import groupby
 import json
@@ -160,3 +166,57 @@ def replay_job(session, job_id: str) -> RollForward:
     finally:
         if temporary is not None:
             temporary.unlink(missing_ok=True)
+
+
+
+def _preperiod_cash(session, job_id: str):
+    """Read persisted lines without flushing, committing, or writing artifacts."""
+    with session.no_autoflush:
+        job = session.get(Job, job_id)
+        if job is None:
+            raise ReplayError("job not found")
+        try:
+            cash_list = json.loads(job.cash_account_ids_json)
+        except (TypeError, ValueError) as error:
+            raise ReplayError("invalid cash_account_ids") from error
+        if not cash_list:
+            raise ReplayError("cash_account_ids empty")
+        if not isinstance(cash_list, list) or any(
+            not isinstance(value, str) or not value.strip() or value == "__CASH_TOTAL__"
+            for value in cash_list
+        ):
+            raise ReplayError("invalid cash_account_ids")
+        rows = session.execute(
+            select(JournalLine.debit_cents, JournalLine.credit_cents)
+            .join(JournalEntry, JournalLine.entry_id == JournalEntry.id)
+            .where(JournalLine.job_id == job_id, JournalEntry.job_id == job_id,
+                   JournalLine.account_id.in_(set(cash_list)),
+                   JournalEntry.is_void.is_(False), JournalEntry.txn_date < job.period_start)
+            .order_by(JournalEntry.txn_date, JournalEntry.created_at, JournalEntry.id, JournalLine.id)
+        )
+        present, total = False, 0
+        for debit, credit in rows:
+            present = True
+            total += debit - credit
+        return job, present, checked(total)
+
+
+def implied_opening_cash_cents(session, job_id: str) -> int:
+    """Sum non-void pre-period cash from zero; never seed the user's claim.
+
+    No prior cash lines means zero, not the expected opening. D1 must use
+    opening_basis to distinguish absent history from books implying zero.
+    Reads persisted lines only; callers must flush desired edits themselves.
+    """
+    return _preperiod_cash(session, job_id)[2]
+
+
+def opening_basis(session, job_id: str) -> tuple[str, int | None]:
+    """Return books_preperiod with the sum if any qualifying cash line exists.
+
+    Otherwise return claimed with expected opening (possibly None). Presence
+    matters independently of amount: offsetting prior lines still establish a
+    books_preperiod basis of zero. This function has no write side effects.
+    """
+    job, present, total = _preperiod_cash(session, job_id)
+    return ("books_preperiod", total) if present else ("claimed", job.expected_opening_cash_cents)

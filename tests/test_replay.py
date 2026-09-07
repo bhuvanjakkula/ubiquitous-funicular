@@ -3,9 +3,10 @@ from datetime import date, datetime
 import json
 import pytest
 from sqlalchemy import func, select
-from ledgertrace.db.models import JournalEntry, JournalLine, BankLine, ReplayBalance
+from ledgertrace.db.models import JournalEntry, JournalLine, BankLine, ReplayBalance, Finding
 from ledgertrace.replay.engine import ReplayError, replay_job, load_rollforward, rollforward_path
-from conftest import ingest_fixture
+from conftest import ingest_fixture, fixtures_dir
+from ledgertrace.replay.engine import implied_opening_cash_cents, opening_basis
 
 
 @pytest.fixture(autouse=True)
@@ -161,3 +162,105 @@ def test_failed_commit_preserves_prior_replay(session, monkeypatch):
     assert balances(session, job) == previous
     assert load_rollforward(job.id) == first
     assert not list(rollforward_path(job.id).parent.glob("*.tmp"))
+
+
+
+def test_d1_fixture_ingest_counts(session):
+    job = ingest_fixture("d1_opening_break", session)
+    assert job.status == "ingested"
+    assert [session.scalar(select(func.count()).select_from(model))
+            for model in (BankLine, JournalEntry, JournalLine, Finding)] == [4, 4, 8, 0]
+    assert {r.source_id for r in session.scalars(select(BankLine))} == {"b0", "b1", "b2", "b3"}
+    assert {r.source_journal_id for r in session.scalars(select(JournalEntry))} == {"j0", "j1", "j2", "j3"}
+    replay_job(session, job.id)
+    assert job.status == "replayed"
+
+
+def test_d1_replay_uses_claimed_opening(session):
+    job = ingest_fixture("d1_opening_break", session)
+    roll = replay_job(session, job.id)
+    assert roll.opening_cash_cents == 100000
+    assert roll.period_cash_movement_cents == 25000
+    assert roll.ending_cash_cents == 125000 and roll.identity_ok
+    assert balances(session, job)[("__CASH_TOTAL__", date(2025, 1, 1))] == 100000
+
+
+def test_d1_implied_opening_from_books(session):
+    job = ingest_fixture("d1_opening_break", session)
+    implied = implied_opening_cash_cents(session, job.id)
+    assert implied == 40000
+    assert job.expected_opening_cash_cents - implied == 60000
+    expected = json.loads((fixtures_dir / "d1_opening_break/expected_findings.json").read_text())
+    assert expected == {"fail": [{"detector_id": "beginning_balance_break", "amount_cents": 60000,
+        "payload": {"expected_opening_cents": 100000, "implied_opening_cents": 40000, "delta_cents": 60000}}],
+        "unknown": [], "info": []}
+
+
+def test_d1_bank_includes_only_period_lines_when_opening_claimed(session):
+    job = ingest_fixture("d1_opening_break", session)
+    roll = replay_job(session, job.id)
+    assert roll.bank_movement_cents == 25000
+    assert roll.bank_ending_cents == 125000 and roll.bank_vs_gl_ok is True
+
+
+def test_happy_implied_opening_zero(session):
+    job = ingest_fixture("happy", session)
+    # Raw implied opening ONLY sums pre-period cash from zero. It never trusts
+    # the claim. D1 must use opening_basis to avoid a false FAIL for absent history.
+    assert implied_opening_cash_cents(session, job.id) == 0
+    assert job.expected_opening_cash_cents == 100000
+
+
+def test_opening_basis_happy_is_claimed(session):
+    job = ingest_fixture("happy", session)
+    assert opening_basis(session, job.id) == ("claimed", 100000)
+
+
+def test_opening_basis_d1_is_books_preperiod(session):
+    job = ingest_fixture("d1_opening_break", session)
+    assert opening_basis(session, job.id) == ("books_preperiod", 40000)
+
+
+def test_d4_replay_regression(session):
+    job = ingest_fixture("d4_unmatched", session)
+    roll = replay_job(session, job.id)
+    assert (roll.ending_cash_cents, roll.bank_ending_cents) == (145000, 112655)
+    assert roll.identity_ok is True and roll.bank_vs_gl_ok is False
+
+
+def test_opening_helpers_read_only_and_missing_claim(session):
+    job = ingest_fixture("happy", session)
+    job.expected_opening_cash_cents = None
+    session.commit()
+    assert implied_opening_cash_cents(session, job.id) == 0
+    assert opening_basis(session, job.id) == ("claimed", None)
+    assert job.status == "ingested" and not balances(session, job)
+    assert not rollforward_path(job.id).exists()
+    roll = replay_job(session, job.id)
+    before = balances(session, job)
+    content = rollforward_path(job.id).read_bytes()
+    assert opening_basis(session, job.id) == ("claimed", None)
+    assert implied_opening_cash_cents(session, job.id) == 0
+    assert balances(session, job) == before
+    assert rollforward_path(job.id).read_bytes() == content
+    assert load_rollforward(job.id) == roll
+
+
+def test_zero_sum_preperiod_still_has_books_basis(session):
+    job = ingest_fixture("d1_opening_break", session)
+    add_cash(session, job, "offset", "2024-12-21", -40000)
+    session.commit()
+    assert implied_opening_cash_cents(session, job.id) == 0
+    assert opening_basis(session, job.id) == ("books_preperiod", 0)
+
+
+def test_opening_helpers_exclude_void_non_cash_and_other_jobs(session):
+    job = ingest_fixture("d1_opening_break", session)
+    session.get(JournalEntry, f"{job.id}:j0").is_void = True
+    add_cash(session, job, "noncash", "2024-12-20", 1234, "6000")
+    add_cash(session, job, "on-start", "2025-01-01", 9999)
+    session.commit()
+    other = ingest_fixture("d1_opening_break", session)
+    assert implied_opening_cash_cents(session, job.id) == 0
+    assert opening_basis(session, job.id) == ("claimed", 100000)
+    assert opening_basis(session, other.id) == ("books_preperiod", 40000)

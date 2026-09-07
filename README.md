@@ -1,4 +1,4 @@
-# LedgerTrace V1 - Day 5
+# LedgerTrace V1 - Day 6
 
 This checkout contains the Day 2 database foundation and Day 3 local CSV ingestion, with Day 4 fixture layouts frozen. The Day 1 money type and `/health` endpoint are retained. Day 5 adds local cash replay. No D1–D5 detectors, matching, job API run route, PDF, or UI are implemented here.
 
@@ -25,7 +25,7 @@ Every session engine enables SQLite foreign keys. Deletion follows database `ON 
 
 The brief names five job statuses despite saying six: queued, ingested, replayed, detected, failed. Those five are enforced. Day 2 permits zero debit and zero credit together, as specified by its checks; validating an economic journal line is a later ingestion concern.
 
-Next: Day 6 test_replay freeze + d1 fixture.
+Next: Day 7 D1 + D4 detectors.
 
 
 ## Day 3 — local CSV ingestion
@@ -71,7 +71,7 @@ explicitly excluded. The original Day 3 ingest and rollback assertions remain.
 | `d4_unmatched/` | Frozen Day 4: 4 bank rows, 4 entries, 8 GL lines, zero ingest findings. Bank `b_fee` is -12345 cents; cash GL `l7` is +20000 cents. Matching assertions belong to Day 7. |
 | `unbalanced_je/` | Original Day 3 fixture: retained journal and lines, one `unbalanced_entry` FAIL for 6000 cents. |
 | `alias_headers/` | Day 4 normalized folder for the former loose `alias_bank.csv`, with matching GL and job files: 2 bank rows, 2 entries, 4 GL lines, zero findings. |
-| `d1_opening_break/` | Job defaults and README only. Filled on the detector day; D1 detector is planned for Day 7. Not ingested in Day 4 tests. |
+| `d1_opening_break/` | Filled Day 6: 4 bank rows, 4 entries, 8 GL lines. Pre-period cash implies 40000 cents against a 100000-cent claim. Seeded replay still ends at 125000. D1 detector is planned for Day 7. |
 | `d2_edited_after_clear/` | Job defaults and README only; populated with D2 on Day 8. Not ingested in Day 4 tests. |
 | `d3_duplicate/` | Job defaults and README only; populated with D3 on Day 9. Not ingested in Day 4 tests. |
 | `d5_after_close/` | Job defaults and README only; populated with D5 on Day 8. Not ingested in Day 4 tests. |
@@ -124,3 +124,40 @@ roll back rows and restore the previous JSON. A filesystem and SQLite are not a
 single crash-atomic transaction: rerun replay after an abrupt process interruption.
 Use a dedicated session because replay flushes and commits pending edits.
 No findings, matches, or later-day outputs are created by replay.
+
+
+## Day 6 - opening evidence and replay freeze
+
+The Day 5 replay function, RollForward fields, and CSV schemas are unchanged.
+`d1_opening_break` is now a complete fixture. Happy and D4 source files remain
+unchanged, and every Day 5 replay assertion is retained.
+
+```python
+from ledgertrace.replay.engine import implied_opening_cash_cents, opening_basis
+
+implied = implied_opening_cash_cents(session, job.id)
+mode, value = opening_basis(session, job.id)
+```
+
+Both helpers are read-only: they neither flush nor commit the session, write
+balance rows, nor create or change rollforward.json. They read persisted journal
+lines; explicitly flush edits before calling if they should participate.
+
+`implied_opening_cash_cents` sums only non-void cash lines strictly before
+period_start, from zero, with no seed from the claim. Happy therefore returns 0;
+D1 returns 40000. `opening_basis` distinguishes absence of history from contrary
+book evidence: when any qualifying pre-period cash line exists, it returns
+`("books_preperiod", sum)`, including when offsetting lines sum to zero. Otherwise
+it returns `("claimed", expected_opening_cash_cents)`, whose value may be None.
+
+Day 7 D1 must use **opening_basis**, not compare the raw implied sum to the claim
+on every job. Missing expected opening yields UNKNOWN. With a supplied opening,
+only books_preperiod mode with a differing value yields FAIL; claimed mode has
+no historical evidence contradicting the claim. Thus happy stays claimed at
+100000. D1 has books_preperiod 40000 against claimed 100000, a 60000-cent
+future discrepancy. Its replay still seeds 100000 and ends at 125000 with
+identity_ok=True; a book-based path would end at 65000. This separates the
+arithmetic replay from the opening evidence without implementing a detector.
+
+`expected_findings.json` records the future D1 result only. No detector package,
+matching, PDF, API run route, or UI has been added in this checkout.

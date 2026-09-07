@@ -1,0 +1,5 @@
+bank_line_id,posted_date,amount,description
+b0,2024-12-20,400.00,Prior year deposit
+b1,2025-01-15,500.00,Customer deposit
+b2,2025-01-16,-200.00,Office rent
+b3,2025-01-17,-50.00,Bank fee
