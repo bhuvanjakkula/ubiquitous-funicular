@@ -1,6 +1,6 @@
 # LedgerTrace V1 â€” Day 2
 
-This checkout contains the Day 2 database foundation and Day 3 local CSV ingestion. The Day 1 money type and `/health` endpoint are retained. No replay engine, D1–D5 detectors, job API routes, PDF, or UI are implemented here.
+This checkout contains the Day 2 database foundation and Day 3 local CSV ingestion, with Day 4 fixture layouts frozen. The Day 1 money type and `/health` endpoint are retained. No replay engine, D1–D5 detectors, job API routes, PDF, or UI are implemented here.
 
 Local only. No GL posting. Not a compliance certificate.
 
@@ -25,7 +25,7 @@ Every session engine enables SQLite foreign keys. Deletion follows database `ON 
 
 The brief names five job statuses despite saying six: queued, ingested, replayed, detected, failed. Those five are enforced. Day 2 permits zero debit and zero credit together, as specified by its checks; validating an economic journal line is a later ingestion concern.
 
-Next: Day 4 remaining fixtures + ingest tests freeze.
+Next: Day 5 replay engine.
 
 
 ## Day 3 — local CSV ingestion
@@ -56,3 +56,28 @@ Supported dates are YYYY-MM-DD or M/D/YYYY; timestamps also accept YYYY-MM-DDTHH
 Journal grouping uses the first line's accounting date even when dates differ, the earliest creation timestamp, the latest modification timestamp, first nonempty source/memo/reversal reference, and any-line void status. Created/modified users come from the earliest/latest respective line (file row breaks ties). Per-line dates and differing per-line memos are not separately retained because Day 2's fixed schema has entry-level fields only. Bank currency is retained or defaults to the job currency; GL currency must match the job since the fixed GL schema has no per-line currency column. There is no currency translation.
 
 Use a dedicated session for `ingest_job`: it commits the complete success path once. Invalid inputs are collected across both files in `IngestError.errors` (file, data row, field where applicable, and message). Header errors include found headers and missing logical fields, with row 0 denoting headers. Any fatal parse or database failure rolls back all ingest rows; failed jobs are not persisted. Unbalanced journals remain stored and produce `unbalanced_entry` FAIL findings with absolute discrepancy cents and scoped entry/line citations. No recon/edit events or later-day outputs are generated.
+
+
+## Fixtures
+
+Day 4 freezes CSV layouts for subsequent work. Run `pytest tests/test_ingest.py -q`.
+The shared `tests/conftest.py` helper `ingest_fixture(name, session)` ingests only
+complete fixtures into a temporary SQLite database. Placeholder directories are
+explicitly excluded. The original Day 3 ingest and rollback assertions remain.
+
+| Folder under `tests/fixtures/` | Contents and planned use |
+| --- | --- |
+| `happy/` | Day 3 baseline, frozen Day 4: 3 bank rows, 3 entries, 6 GL lines, zero findings. Cash deltas are +50000, -20000, -5000 cents. Reused from Day 5 replay onward. |
+| `d4_unmatched/` | Frozen Day 4: 4 bank rows, 4 entries, 8 GL lines, zero ingest findings. Bank `b_fee` is -12345 cents; cash GL `l7` is +20000 cents. Matching assertions belong to Day 7. |
+| `unbalanced_je/` | Original Day 3 fixture: retained journal and lines, one `unbalanced_entry` FAIL for 6000 cents. |
+| `alias_headers/` | Day 4 normalized folder for the former loose `alias_bank.csv`, with matching GL and job files: 2 bank rows, 2 entries, 4 GL lines, zero findings. |
+| `d1_opening_break/` | Job defaults and README only. Filled on the detector day; D1 detector is planned for Day 7. Not ingested in Day 4 tests. |
+| `d2_edited_after_clear/` | Job defaults and README only; populated with D2 on Day 8. Not ingested in Day 4 tests. |
+| `d3_duplicate/` | Job defaults and README only; populated with D3 on Day 9. Not ingested in Day 4 tests. |
+| `d5_after_close/` | Job defaults and README only; populated with D5 on Day 8. Not ingested in Day 4 tests. |
+
+`expected_findings.json` contains `fail`, `unknown`, and `info` arrays. The happy
+file is empty. The D4 file documents two **future** matching failures using the
+Day 4 brief's exact IDs, `unmatched_bank` and `unmatched_gl`; it does not describe
+Day 4 ingest output. No matching detector is called and no matches are written.
+Ingest findings still contain only the existing unbalanced-journal check.

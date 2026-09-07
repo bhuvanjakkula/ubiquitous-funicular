@@ -1,14 +1,13 @@
 import hashlib
 import json
 from datetime import date, datetime
-from pathlib import Path
 import pytest
 from pydantic import ValidationError
 from sqlalchemy import event, func, select
-from sqlalchemy.orm import Session
-from ledgertrace.db.base import Base
-from ledgertrace.db.models import Job, BankLine, JournalEntry, JournalLine, Finding
-from ledgertrace.db.session import engine_from_url
+from ledgertrace.db.models import (
+    Job, BankLine, JournalEntry, JournalLine, Finding, Match, ReplayBalance,
+    ReconEvent, EditEvent, EvidencePack,
+)
 from ledgertrace.ingest.aliases import norm_header, resolve_headers, BANK_ALIASES
 from ledgertrace.ingest.csv_bank import parse_bank
 from ledgertrace.ingest.csv_gl import parse_gl
@@ -17,18 +16,12 @@ from ledgertrace.ingest.job_config import JobConfig, load_job_config
 from ledgertrace.ingest.parse_money import parse_amount_to_cents
 from ledgertrace.ingest.service import ingest_job, IngestError
 
-FIXTURES = Path(__file__).parent / "fixtures"
-
-@pytest.fixture
-def session(tmp_path):
-    engine = engine_from_url("sqlite:///" + (tmp_path / "ingest.db").as_posix())
-    Base.metadata.create_all(engine)
-    with Session(engine, expire_on_commit=False, autoflush=False) as session:
-        yield session
-    engine.dispose()
+from conftest import fixtures_dir as FIXTURES, ingest_fixture
 
 
 def ingest(session, name="happy", bank=None, gl=None):
+    if bank is None and gl is None:
+        return ingest_fixture(name, session)
     folder = FIXTURES / name
     return ingest_job(session, bank or folder / "bank.csv", gl or folder / "gl.csv", load_job_config(folder / "job.json"))
 
@@ -53,6 +46,8 @@ def test_happy_ingest_counts(session):
     assert [count(session, model) for model in [BankLine, JournalEntry, JournalLine, Finding]] == [3, 3, 6, 0]
     assert job.status == "ingested"
     assert len(job.input_bank_sha256) == len(job.input_gl_sha256) == 64
+    assert all(c in "0123456789abcdef" for c in job.input_bank_sha256 + job.input_gl_sha256)
+    assert_no_later_stage_rows(session)
     assert job.input_bank_sha256 == sha256_file(FIXTURES / "happy/bank.csv")
     assert job.input_gl_sha256 == sha256_file(FIXTURES / "happy/gl.csv")
     assert len(job.id) == 32 and int(job.id, 16) >= 0
@@ -65,6 +60,10 @@ def test_happy_cents(session):
     assert session.get(BankLine, f"{job.id}:b2").amount_cents == -20000
     line = session.get(JournalLine, f"{job.id}:l1")
     assert (line.debit_cents, line.credit_cents) == (50000, 0)
+    cash = list(session.scalars(select(JournalLine).where(JournalLine.account_id == "1000")))
+    assert {r.source_line_id: r.debit_cents - r.credit_cents for r in cash} == {
+        "l1": 50000, "l4": -20000, "l6": -5000,
+    }
 
 
 def test_ids_are_scoped(session):
@@ -90,7 +89,7 @@ def test_unbalanced_entry_finding(session):
 
 
 def test_alias_bank_headers(session):
-    job = ingest(session, bank=FIXTURES / "alias_bank.csv")
+    job = ingest_fixture("alias_headers", session)
     rows = list(session.scalars(select(BankLine).order_by(BankLine.file_row)))
     assert [(r.source_id, r.amount_cents, r.fitid) for r in rows] == [("fit-1", -1200, "fit-1"), ("fit-2", 9000, "fit-2")]
 
@@ -226,3 +225,68 @@ def test_config_requirements():
     for updates in [dict(cash_account_ids=[]), dict(period_end="2024-01-01"), dict(expected_opening_cash_cents=1.1)]:
         with pytest.raises(ValidationError):
             JobConfig(**(values | updates))
+
+
+# Ingest must not materialize any later-day results.
+def assert_no_later_stage_rows(session):
+    for model in (Match, ReplayBalance, ReconEvent, EditEvent, EvidencePack):
+        assert count(session, model) == 0
+
+
+def test_d4_unmatched_ingest_counts(session):
+    job = ingest_fixture("d4_unmatched", session)
+    assert job.status == "ingested"
+    assert [count(session, model) for model in (BankLine, JournalEntry, JournalLine, Finding)] == [4, 4, 8, 0]
+    fee = session.get(BankLine, f"{job.id}:b_fee")
+    assert fee.source_id == "b_fee" and fee.amount_cents == -12345
+    receipt = session.get(JournalLine, f"{job.id}:l7")
+    assert (receipt.account_id, receipt.debit_cents, receipt.credit_cents) == ("1000", 20000, 0)
+    assert job.input_bank_sha256 == sha256_file(FIXTURES / "d4_unmatched/bank.csv")
+    assert job.input_gl_sha256 == sha256_file(FIXTURES / "d4_unmatched/gl.csv")
+    assert_no_later_stage_rows(session)
+
+
+def test_happy_expected_findings_file_exists_and_empty_fail():
+    expected = json.loads((FIXTURES / "happy/expected_findings.json").read_text())
+    assert expected == {"fail": [], "unknown": [], "info": []}
+
+
+def test_d4_expected_findings_file_lists_two_future_fails():
+    expected = json.loads((FIXTURES / "d4_unmatched/expected_findings.json").read_text())
+    assert expected == {
+        "fail": [
+            {"detector_id": "unmatched_bank", "amount_cents": -12345, "source_id": "b_fee"},
+            {"detector_id": "unmatched_gl", "amount_cents": 20000, "source_id": "l7"},
+        ],
+        "unknown": [], "info": [],
+    }
+
+
+def test_alias_headers_ingest(session):
+    job = ingest_fixture("alias_headers", session)
+    assert job.status == "ingested"
+    banks = list(session.scalars(select(BankLine).order_by(BankLine.file_row)))
+    assert [row.amount_cents for row in banks] == [-1200, 9000]
+    assert [count(session, model) for model in (BankLine, JournalEntry, JournalLine, Finding)] == [2, 2, 4, 0]
+    lines = list(session.scalars(select(JournalLine).order_by(JournalLine.file_row)))
+    assert [row.source_line_id for row in lines] == ["j-a#1", "j-a#2", "j-b#3", "j-b#4"]
+    assert_no_later_stage_rows(session)
+
+
+def test_fixture_headers_stable():
+    bank_header = "bank_line_id,posted_date,amount,description"
+    gl_header = "line_id,journal_id,txn_date,account_id,account_name,debit,credit,memo,created_at,modified_at,cleared_flag,cleared_date"
+    for name in ("happy", "d4_unmatched"):
+        assert (FIXTURES / name / "bank.csv").read_text().splitlines()[0] == bank_header
+        assert (FIXTURES / name / "gl.csv").read_text().splitlines()[0] == gl_header
+
+
+def test_detector_placeholders_are_not_ingest_fixtures():
+    from conftest import INGEST_FIXTURES
+    shared = json.loads((FIXTURES / "happy/job.json").read_text())
+    for name in ("d1_opening_break", "d2_edited_after_clear", "d3_duplicate", "d5_after_close"):
+        folder = FIXTURES / name
+        assert {p.name for p in folder.iterdir()} == {"README.md", "job.json"}
+        assert (folder / "README.md").read_text().strip() == "Filled on the detector day. Do not ingest in Day 4 tests."
+        assert json.loads((folder / "job.json").read_text()) == shared
+        assert name not in INGEST_FIXTURES

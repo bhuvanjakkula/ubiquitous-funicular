@@ -1,0 +1,16 @@
+{
+  "fail": [
+    {
+      "detector_id": "unmatched_bank",
+      "amount_cents": -12345,
+      "source_id": "b_fee"
+    },
+    {
+      "detector_id": "unmatched_gl",
+      "amount_cents": 20000,
+      "source_id": "l7"
+    }
+  ],
+  "unknown": [],
+  "info": []
+}
