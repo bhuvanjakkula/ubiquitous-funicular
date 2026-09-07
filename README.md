@@ -1,6 +1,6 @@
-# LedgerTrace V1 — Day 2
+# LedgerTrace V1 â€” Day 2
 
-This checkout stops at the Day 2 database foundation. The Day 1 money type and `/health` endpoint are retained. No ingestion, replay engine, detectors, job API routes, or UI are implemented here.
+This checkout contains the Day 2 database foundation and Day 3 local CSV ingestion. The Day 1 money type and `/health` endpoint are retained. No replay engine, D1–D5 detectors, job API routes, PDF, or UI are implemented here.
 
 Local only. No GL posting. Not a compliance certificate.
 
@@ -25,4 +25,34 @@ Every session engine enables SQLite foreign keys. Deletion follows database `ON 
 
 The brief names five job statuses despite saying six: queued, ingested, replayed, detected, failed. Those five are enforced. Day 2 permits zero debit and zero credit together, as specified by its checks; validating an economic journal line is a later ingestion concern.
 
-Next: Day 3 CSV ingest.
+Next: Day 4 remaining fixtures + ingest tests freeze.
+
+
+## Day 3 — local CSV ingestion
+
+Run `pytest tests/test_ingest.py -q`. After `alembic upgrade head`, ingest the happy fixtures from the repository root:
+
+```python
+from pathlib import Path
+from ledgertrace.db.session import SessionLocal
+from ledgertrace.ingest.job_config import load_job_config
+from ledgertrace.ingest.service import ingest_job
+
+fixture = Path("tests/fixtures/happy")
+config = load_job_config(fixture / "job.json")
+with SessionLocal() as session:
+    job = ingest_job(session, fixture / "bank.csv", fixture / "gl.csv", config)
+    print(job.id, job.status, job.input_bank_sha256, job.input_gl_sha256)
+```
+
+`JobConfig` requires at least one cash account and an ordered period. Money is integer cents only; floating-point job balances are rejected. Bank amounts accept signed decimal text, commas, dollar signs, and negative parentheses. Empty split debit/credit fields become zero; required Amount fields cannot be blank. A complete bank debit/credit pair overrides Amount. With only one split column plus Amount, Amount wins. A split-only export may contain one side. GL lines require one positive side and reject negative, dual-sided, or zero-sided lines.
+
+Header normalization lowercases, strips, and collapses inner whitespace. Canonical underscore names are always recognized. Alias sets have no inherent order, so resolution tries the canonical name first, then sorted aliases for deterministic first-match behavior. Duplicate normalized header names use the first original column. All requested aliases are in `ledgertrace/ingest/aliases.py`.
+
+CSV data rows are numbered starting at **1**, excluding the header. Empty bank records with blank date, amounts, and description are skipped; they still occupy a data-row number. Synthetic bank IDs use `filename_stem#data_row`, and synthetic GL line IDs use `journal_id#data_row`. Every stored ID is scoped to the UUID job. CSV parsing uses UTF-8 with optional BOM. Input hashes cover the exact raw byte snapshots that are parsed, including BOM and line endings.
+
+Supported dates are YYYY-MM-DD or M/D/YYYY; timestamps also accept YYYY-MM-DDTHH:MM:SS. Timezone-bearing timestamps are rejected. Timestamps follow Day 2's documented naive-UTC storage convention; callers must provide UTC, and ingestion performs no timezone conversion. Missing creation time uses the transaction date at midnight; missing modification time uses creation time.
+
+Journal grouping uses the first line's accounting date even when dates differ, the earliest creation timestamp, the latest modification timestamp, first nonempty source/memo/reversal reference, and any-line void status. Created/modified users come from the earliest/latest respective line (file row breaks ties). Per-line dates and differing per-line memos are not separately retained because Day 2's fixed schema has entry-level fields only. Bank currency is retained or defaults to the job currency; GL currency must match the job since the fixed GL schema has no per-line currency column. There is no currency translation.
+
+Use a dedicated session for `ingest_job`: it commits the complete success path once. Invalid inputs are collected across both files in `IngestError.errors` (file, data row, field where applicable, and message). Header errors include found headers and missing logical fields, with row 0 denoting headers. Any fatal parse or database failure rolls back all ingest rows; failed jobs are not persisted. Unbalanced journals remain stored and produce `unbalanced_entry` FAIL findings with absolute discrepancy cents and scoped entry/line citations. No recon/edit events or later-day outputs are generated.

@@ -1,4 +1,4 @@
-"""Exact cents. Decimal is used only to parse textual input, never floats."""
+"""Exact cents parsed from decimal text with integer arithmetic, never floats."""
 from dataclasses import dataclass
 import re
 
