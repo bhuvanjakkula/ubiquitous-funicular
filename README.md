@@ -1,6 +1,6 @@
-# LedgerTrace V1 â€” Day 2
+# LedgerTrace V1 - Day 5
 
-This checkout contains the Day 2 database foundation and Day 3 local CSV ingestion, with Day 4 fixture layouts frozen. The Day 1 money type and `/health` endpoint are retained. No replay engine, D1–D5 detectors, job API routes, PDF, or UI are implemented here.
+This checkout contains the Day 2 database foundation and Day 3 local CSV ingestion, with Day 4 fixture layouts frozen. The Day 1 money type and `/health` endpoint are retained. Day 5 adds local cash replay. No D1–D5 detectors, matching, job API run route, PDF, or UI are implemented here.
 
 Local only. No GL posting. Not a compliance certificate.
 
@@ -25,7 +25,7 @@ Every session engine enables SQLite foreign keys. Deletion follows database `ON 
 
 The brief names five job statuses despite saying six: queued, ingested, replayed, detected, failed. Those five are enforced. Day 2 permits zero debit and zero credit together, as specified by its checks; validating an economic journal line is a later ingestion concern.
 
-Next: Day 5 replay engine.
+Next: Day 6 test_replay freeze + d1 fixture.
 
 
 ## Day 3 — local CSV ingestion
@@ -81,3 +81,46 @@ file is empty. The D4 file documents two **future** matching failures using the
 Day 4 brief's exact IDs, `unmatched_bank` and `unmatched_gl`; it does not describe
 Day 4 ingest output. No matching detector is called and no matches are written.
 Ingest findings still contain only the existing unbalanced-journal check.
+
+
+## Day 5 - replay and cash identity
+
+After ingesting with the Day 3 example, use the same dedicated session:
+
+```python
+from ledgertrace.replay.engine import replay_job, load_rollforward
+
+roll = replay_job(session, job.id)
+print(roll.ending_cash_cents, roll.identity_ok, roll.bank_vs_gl_ok)
+assert load_rollforward(job.id) == roll
+```
+
+Run `pytest tests/test_replay.py -q`. No schema migration is required.
+The engine writes `data/jobs/{job_id}/rollforward.json`; set
+`LEDGERTRACE_DATA_DIR` to change the output root (tests use a temporary directory).
+`load_rollforward(job_id)` returns the frozen `RollForward` dataclass.
+JSON contains `opening_cash_cents`, `period_cash_movement_cents`,
+`ending_cash_cents`, `bank_opening_cents`, `bank_movement_cents`,
+`bank_ending_cents`, `identity_ok`, `bank_vs_gl_ok`, and `notes` (a JSON array).
+
+**Expected opening means cash at the start of period_start, before that day's
+transactions.** Pre-period cash GL and bank rows are already included in that
+opening and are ignored. Without an opening, GL replay starts at zero and includes
+pre-period cash activity, while period movement still counts only in-period
+lines. The opening remains null. Bank ending is relative period movement and
+bank_vs_gl_ok remains null with the note `absolute bank ending unknown without opening`.
+A supplied closing mismatch adds `closing_mismatch` without changing the arithmetic identity.
+
+Non-void lines replay in `(txn_date, created_at, entry.id, line.id)` order;
+future lines are excluded. Snapshots are end-of-day values for period start,
+period end, and each cash movement date, for all configured cash accounts and
+`__CASH_TOTAL__`. A start-day movement therefore updates the start snapshot after
+the supplied opening. Unused cash accounts are included. Multiple cash accounts
+receive no invented opening allocation: only the virtual total is seeded.
+
+Replay replaces this job's balance rows and JSON, and changes ingested status to
+replayed. The file is staged and atomically replaced; caught database failures
+roll back rows and restore the previous JSON. A filesystem and SQLite are not a
+single crash-atomic transaction: rerun replay after an abrupt process interruption.
+Use a dedicated session because replay flushes and commits pending edits.
+No findings, matches, or later-day outputs are created by replay.
