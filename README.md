@@ -324,3 +324,65 @@ no D3 FAILs. No existing fixture amounts or D1/D2/D4/D5 algorithms were changed.
 Run `pytest tests/test_detect_d3.py tests/test_detect_d2_d5.py tests/test_detect_d1_d4.py tests/test_replay.py tests/test_ingest.py -q`.
 Evidence JSON/run_all is reserved for Day 10; PDF, API run routes, and UI remain
 outside this checkpoint.
+
+
+## Day 10 - run_all and evidence JSON
+
+```python
+from ledgertrace.db.session import SessionLocal
+from ledgertrace.ingest.job_config import load_job_config
+from ledgertrace.ingest.service import ingest_job
+from ledgertrace.detect.run_all import run_all
+
+with SessionLocal() as session:
+    job = ingest_job(session, "bank.csv", "gl.csv", load_job_config("job.json"))
+    result = run_all(session, job.id)
+    print(result["finding_counts"], result["evidence_json"])
+```
+
+`run_all` is the single pipeline: replay, D1/D2/D3/D4/D5, persist findings and
+matches, write evidence, then commit status `detected`. All earlier runner names
+are aliases to it. Missing jobs raise `RunError`; failed jobs are rejected before
+replay. No detector logic or fixture amounts changed in Day 10.
+
+The returned dictionary retains `job_id`, `status`, `matches`, and flat
+`finding_counts` totals for compatibility. It adds `finding_counts_by_detector`
+(each detector has FAIL/UNKNOWN/INFO counts) and the absolute `evidence_json`
+path. Counts now include all persisted findings, including `unbalanced_entry`.
+The helper `counts_by_severity_and_detector` exposes both aggregate views.
+
+The workpaper is `data/jobs/{job_id}/evidence.json`, or under
+`LEDGERTRACE_DATA_DIR` when configured. It includes job configuration, original
+input SHA-256 hashes, roll-forward values and opening basis, match counts and
+methods, and findings ordered by detector ID and finding ID. Citation arrays
+and payloads are decoded JSON, cents remain integers, and absent values remain
+null. Only FAILs generate proposed `inspect` actions for professional review.
+The disclaimer states that LedgerTrace does not post to the general ledger or
+certify GAAP, IFRS, or SOX. No journals are posted and no PDF is generated.
+
+Each job upserts the same `EvidencePack` ID, `{job_id}:evidence`, with its JSON
+path, empty PDF path, and refreshed UTC creation time. The JSON omits generation
+time so unchanged reruns produce identical bytes. Replacing an existing pack
+replaces resolved findings as well; ingest findings and other jobs are preserved.
+
+Replay remains a separate committed checkpoint. Evidence uses a temporary file
+and atomic replacement; an exception during the subsequent detector transaction
+rolls back its database changes and restores the prior evidence bytes (or removes
+a newly created file). Direct `write_evidence_json` callers own their transaction
+and file recovery; use `run_all` for the managed pipeline. Run one writer per job
+at a time. This exception recovery is not a cross-filesystem/database transaction
+or a guarantee against abrupt process termination.
+
+The existing local FastAPI app now exposes:
+
+- `POST /api/jobs/{job_id}/run`: runs the pipeline and returns its result.
+- `GET /api/jobs/{job_id}/evidence.json`: downloads the committed job's JSON.
+- `/health` remains available. Unknown jobs and unavailable evidence return 404;
+  failed jobs or invalid replay/detector inputs return 409 from the run route.
+
+Use the existing local server with its database initialized and the same
+`LEDGERTRACE_DATA_DIR` used for ingest. This adds no public hosting or upload UI.
+Run `pytest tests/test_evidence_json.py -q`, or `pytest tests -q` for all prior
+regressions. Happy has zero FAILs, ending cash 125000 and three matches. D4's
+workpaper contains unmatched bank -12345, unmatched GL 20000, and the separate
+bank-versus-GL discrepancy, with identity_ok true. PDF remains Day 11 work.

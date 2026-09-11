@@ -57,7 +57,7 @@ def mini_job(session, tmp_path, bank_rows, cash_rows):
 def test_happy_d1_pass_d4_all_matched(session):
     job = ingest_fixture("happy", session)
     result = run_d1_d4(session, job.id)
-    assert result == {"job_id": job.id, "status": "detected", "matches": 3,
+    assert {key: result[key] for key in ("job_id", "status", "matches", "finding_counts")} == {"job_id": job.id, "status": "detected", "matches": 3,
                       "finding_counts": {"FAIL": 0, "UNKNOWN": 0, "INFO": 0}}
     assert findings(session, job) == []
     assert pairs(session, job) == {("b1", "l1"), ("b2", "l4"), ("b3", "l6")}
