@@ -9,7 +9,7 @@ from ledgertrace.money import LIMIT
 
 D1_D4_IDS = frozenset({"beginning_balance_break", "unmatched_bank", "unmatched_gl"})
 D2_D5_IDS = frozenset({"edited_after_clear", "period_mutation"})
-DETECTOR_IDS = D1_D4_IDS | D2_D5_IDS
+DETECTOR_IDS = D1_D4_IDS | D2_D5_IDS | {"duplicate_event"}
 
 
 class DetectorError(ValueError):

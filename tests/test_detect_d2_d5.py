@@ -161,14 +161,14 @@ def test_alias_metadata(session):
     assert run_d5(session, job.id)[0].severity == "UNKNOWN"
 
 
-def test_runners_preserve_scopes_and_repeat(session):
+def test_compatibility_runners_repeat_and_resolve(session):
     job = ingest_fixture("d2_edited_after_clear", session)
     run_d1_d4(session, job.id)
     original = {f.id for f in session.scalars(select(Finding))}
     first = run_d2_d5(session, job.id)
     ids = {f.id for f in session.scalars(select(Finding))}
     assert first["finding_counts"] == {"FAIL": 1, "UNKNOWN": 0, "INFO": 0}
-    assert original < ids
+    assert original == ids
     assert run_d2_d5(session, job.id) == first
     assert {f.id for f in session.scalars(select(Finding))} == ids
     run_d1_d4(session, job.id)
@@ -176,7 +176,7 @@ def test_runners_preserve_scopes_and_repeat(session):
     entry = session.scalar(select(JournalEntry).where(JournalEntry.source_journal_id == "j2"))
     entry.modified_at = entry.created_at
     run_d2_d5(session, job.id)
-    assert {f.id for f in session.scalars(select(Finding))} == original
+    assert {f.id for f in session.scalars(select(Finding))} == set()
 
 
 def test_ingest_failure_removes_metadata(session, tmp_path, monkeypatch):
@@ -216,8 +216,15 @@ def test_runner_failure_rolls_back_prior_results(session, monkeypatch):
     job = ingest_fixture("d2_edited_after_clear", session)
     run_d2_d5(session, job.id)
     prior = {f.id for f in session.scalars(select(Finding))}
-    def fail(): raise RuntimeError("commit failed")
-    monkeypatch.setattr(session, "commit", fail)
+    commit = session.commit
+    calls = 0
+    def fail_detector_commit():
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise RuntimeError("commit failed")
+        commit()  # replay is a separate committed checkpoint
+    monkeypatch.setattr(session, "commit", fail_detector_commit)
     with pytest.raises(RuntimeError, match="commit failed"):
         run_d2_d5(session, job.id)
     assert {f.id for f in session.scalars(select(Finding))} == prior

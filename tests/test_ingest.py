@@ -281,15 +281,11 @@ def test_fixture_headers_stable():
         assert (FIXTURES / name / "gl.csv").read_text().splitlines()[0] == gl_header
 
 
-def test_detector_placeholders_are_not_ingest_fixtures():
+def test_d3_fixture_is_ingest_ready():
     from conftest import INGEST_FIXTURES
-    shared = json.loads((FIXTURES / "happy/job.json").read_text())
-    for name in ("d3_duplicate",):
-        folder = FIXTURES / name
-        assert {p.name for p in folder.iterdir()} == {"README.md", "job.json"}
-        assert (folder / "README.md").read_text().strip() == "Filled on the detector day. Do not ingest in Day 4 tests."
-        assert json.loads((folder / "job.json").read_text()) == shared
-        assert name not in INGEST_FIXTURES
+    assert "d3_duplicate" in INGEST_FIXTURES
+    assert {p.name for p in (FIXTURES / "d3_duplicate").iterdir()} == {
+        "bank.csv", "gl.csv", "job.json", "expected_findings.json"}
 
 
 def test_happy_gl_columns_marks_modified_and_cleared_present(session):

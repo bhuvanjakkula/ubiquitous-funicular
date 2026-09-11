@@ -1,0 +1,15 @@
+line_id,journal_id,txn_date,account_id,account_name,debit,credit,memo,created_at,modified_at,cleared_flag,cleared_date
+l1,j1,2025-01-15,1000,Checking,500.00,0,Customer deposit,2025-01-15,2025-01-15,true,2025-01-31
+l2,j1,2025-01-15,4000,Revenue,0,500.00,Customer deposit,2025-01-15,2025-01-15,,
+l3,j2,2025-01-16,6100,Rent,200.00,0,Office rent,2025-01-16,2025-01-16,,
+l4,j2,2025-01-16,1000,Checking,0,200.00,Office rent,2025-01-16,2025-01-16,true,2025-01-31
+l5,j3,2025-01-17,6200,Bank fees,50.00,0,Bank fee,2025-01-17,2025-01-17,,
+l6,j3,2025-01-17,1000,Checking,0,50.00,Bank fee,2025-01-17,2025-01-17,true,2025-01-31
+l_d1a,j_d1,2025-04-01,1000,Checking,250.00,0,Wire from ACME 998877,2025-04-01,2025-04-01,,
+l_d1b,j_d1,2025-04-01,4000,Revenue,0,250.00,Wire from ACME 998877,2025-04-01,2025-04-01,,
+l_d2a,j_d2,2025-04-01,1000,Checking,250.00,0,Wire from ACME 112233,2025-04-01,2025-04-01,,
+l_d2b,j_d2,2025-04-01,4000,Revenue,0,250.00,Wire from ACME 112233,2025-04-01,2025-04-01,,
+l_r1a,j_r1,2025-05-01,1000,Checking,80.00,0,Vendor refund,2025-05-01,2025-05-01,,
+l_r1b,j_r1,2025-05-01,4000,Revenue,0,80.00,Vendor refund,2025-05-01,2025-05-01,,
+l_r2a,j_r2,2025-05-02,4000,Revenue,80.00,0,VOID Vendor refund,2025-05-02,2025-05-02,,
+l_r2b,j_r2,2025-05-02,1000,Checking,0,80.00,VOID Vendor refund,2025-05-02,2025-05-02,,

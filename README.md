@@ -270,4 +270,57 @@ has a D2 finding for l8, while its extra cash payments reduce replay ending to
 Happy produces no D2/D5 findings. Happy, D1, and D4 CSVs remain unchanged.
 
 Run `pytest tests/test_detect_d2_d5.py tests/test_detect_d1_d4.py tests/test_replay.py tests/test_ingest.py -q`.
-D3 remains a placeholder for Day 9.
+Day 9 fills the D3 fixture and extends the runner as described below.
+
+
+## Day 9 - D3 duplicate economic events
+
+```python
+from ledgertrace.detect.run_integrity import run_integrity
+
+result = run_integrity(session, job.id)
+```
+
+This is now the shared D1–D5 runner. `run_d1_d4`, `run_d2_d5`, and
+`run_d1_d2_d4_d5` are compatibility aliases to it, superseding their earlier
+scoped behavior. All return match counts and total finding counts. Replay
+commits first; findings and match proposals then commit together. Repeat runs
+replace all six integrity detector IDs, including `duplicate_event`, preserving
+`unbalanced_entry` and other jobs. Earlier detector algorithms remain unchanged.
+
+D3 uses in-period bank rows and non-void, in-period cash GL lines. Bank signatures
+are posted date, signed integer amount, and normalized description. GL signatures
+are transaction date, signed debit-minus-credit cents, cash account ID, and the
+entry memo normalized in the same way. Normalization lowercases, removes digit
+runs of five or more digits, replaces punctuation with whitespace, and collapses
+whitespace. The pasted brief contained truncated filters and an empty regex;
+these choices preserve the stated fixture signatures. Description hashes use
+SHA-256's first eight hex characters, not Python's process-randomized hash.
+
+Full signatures with at least two records produce one FAIL citing the entire
+cluster, with the absolute amount. A GL cluster must span at least two distinct
+journal entries; same-entry cash splits alone are ignored. Only cash lines are
+cited, never their revenue counterparts. Remaining bank rows with the same date
+and signed amount but different descriptions produce INFO. Rows already in full
+signature FAILs are excluded from that INFO check. D3 never cross-matches bank
+against GL. Missing cash accounts yield a single cited UNKNOWN from `run_d3`;
+the full runner still requires cash accounts for replay, as before.
+
+Before clustering, each stream independently excludes one-to-one reversal pairs:
+opposite nonzero amounts of equal magnitude, dates within three days inclusive,
+and either memo containing VOID, REVERSE, REVERSAL, or CANCEL, or an explicit GL
+`reverses_id` pointing to the other entry. Equal signs, zero amounts, and dates
+outside the window never qualify. GL lines within one journal are not reversal
+pairs. Explicit links take precedence; remaining proposals use chronological
+and ID order. One reversal consumes only one matching original, leaving any
+additional repeated transactions available for duplicate detection. This is a
+deterministic V1 heuristic, not a posting or an assertion of economic intent.
+
+The D3 fixture yields a bank FAIL of 25000 cents and a cash GL FAIL of 25000 cents
+for the two ACME wires, plus INFO for the two differently described 4000-cent
+bank amounts. The 8000-cent reversal pairs are excluded. Earlier fixtures gain
+no D3 FAILs. No existing fixture amounts or D1/D2/D4/D5 algorithms were changed.
+
+Run `pytest tests/test_detect_d3.py tests/test_detect_d2_d5.py tests/test_detect_d1_d4.py tests/test_replay.py tests/test_ingest.py -q`.
+Evidence JSON/run_all is reserved for Day 10; PDF, API run routes, and UI remain
+outside this checkpoint.
