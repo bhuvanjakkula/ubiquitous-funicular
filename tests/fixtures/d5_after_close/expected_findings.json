@@ -1,16 +1,12 @@
 {
   "fail": [
     {
-      "detector_id": "period_mutation_after_close",
-      "title": "Period books mutated after close date"
+      "detector_id": "period_mutation",
+      "source_id": "j5"
     },
     {
-      "detector_id": "period_mutation_after_close",
-      "title": "Period books mutated after close date"
-    },
-    {
-      "detector_id": "period_mutation_after_close",
-      "title": "Backdated entry created after close"
+      "detector_id": "period_mutation",
+      "source_id": "j6"
     }
   ],
   "unknown": [],

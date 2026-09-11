@@ -1,5 +1,5 @@
 from pathlib import Path
-from .aliases import GL_ALIASES
+from .aliases import GL_ALIASES, norm_header
 from .common import read_rows, RowParser, parse_date, parse_datetime, parse_bool, required
 from .parse_money import parse_optional_cents
 from .errors import IngestError
@@ -8,7 +8,15 @@ from .errors import IngestError
 def parse_gl(path, currency="USD", *, data=None, metadata=None):
     rows, mapping, errors = read_rows(path, GL_ALIASES, {"journal_id", "txn_date", "account_id"}, ("debit", "credit"), data)
     if metadata is not None:
-        metadata.update(columns=sorted(mapping), missing={
+        # Capture source headers before applying any timestamp defaults.
+        import csv
+        import io
+        source = data if data is not None else Path(path).read_bytes()
+        headers = next(csv.reader(io.StringIO(source.decode("utf-8-sig"))))
+        metadata.update(headers_normalized=[norm_header(h) for h in headers],
+                        resolved={field: field in mapping for field in
+                                  ("modified_at", "created_at", "cleared_flag", "cleared_date")},
+                        columns=sorted(mapping), missing={
             field: [number for number, row, _ in rows if not row.get(field)]
             for field in ("created_at", "modified_at")})
     result, seen = [], set()

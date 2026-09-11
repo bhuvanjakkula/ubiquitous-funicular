@@ -290,3 +290,12 @@ def test_detector_placeholders_are_not_ingest_fixtures():
         assert (folder / "README.md").read_text().strip() == "Filled on the detector day. Do not ingest in Day 4 tests."
         assert json.loads((folder / "job.json").read_text()) == shared
         assert name not in INGEST_FIXTURES
+
+
+def test_happy_gl_columns_marks_modified_and_cleared_present(session):
+    from ledgertrace.ingest.column_presence import load, metadata_path
+    job = ingest_fixture("happy", session)
+    columns = load(job)
+    assert metadata_path(job.id).name == "gl_columns.json"
+    assert columns["resolved"] == dict(modified_at=True, created_at=True, cleared_flag=True, cleared_date=True)
+    assert {"modified_at", "created_at", "cleared_flag", "cleared_date"} <= set(columns["headers_normalized"])

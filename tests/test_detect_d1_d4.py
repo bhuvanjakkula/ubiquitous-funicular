@@ -11,7 +11,7 @@ from ledgertrace.replay.engine import replay_job
 from ledgertrace.detect.base import DetectorError, persist_findings
 from ledgertrace.detect.beginning_balance import run_d1
 from ledgertrace.detect.unmatched_bank import run_d4
-from ledgertrace.detect.run_d1_d4 import run_d1_d4
+from ledgertrace.detect.run_integrity_partial import run_d1_d2_d4_d5 as run_d1_d4
 from conftest import ingest_fixture, fixtures_dir
 
 
@@ -136,7 +136,10 @@ def test_d4_pass_b_unique_off_date(session, tmp_path):
     assert pairs(session, job) == {("B", "L")}
     row = matches(session, job)[0]
     assert row.method == "amount_date_desc" and row.confidence in (80, 90)
-    out = findings(session, job)
+    all_findings = findings(session, job)
+    out = [f for f in all_findings if f.detector_id in {"beginning_balance_break", "unmatched_bank", "unmatched_gl"}]
+    assert {(f.detector_id, f.severity) for f in all_findings if f not in out} == {
+        ("edited_after_clear", "UNKNOWN"), ("period_mutation", "UNKNOWN")}
     assert len(out) == 1 and out[0].severity == "INFO"
     assert json.loads(out[0].payload_json)["pass"] == "B"
 

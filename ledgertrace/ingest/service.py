@@ -11,7 +11,7 @@ from .csv_gl import parse_gl
 from .errors import IngestError
 from .hashing import sha256_bytes
 from .job_config import JobConfig
-from .metadata import metadata_path, write_metadata
+from .column_presence import metadata_path, write_metadata
 
 
 def ingest_job(session, bank_path, gl_path, config: JobConfig) -> Job:
