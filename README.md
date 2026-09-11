@@ -1,6 +1,6 @@
-# LedgerTrace V1 - Day 6
+# LedgerTrace V1 - Day 7
 
-This checkout contains the Day 2 database foundation and Day 3 local CSV ingestion, with Day 4 fixture layouts frozen. The Day 1 money type and `/health` endpoint are retained. Day 5 adds local cash replay. No D1–D5 detectors, matching, job API run route, PDF, or UI are implemented here.
+This checkout contains the Day 2 database foundation and Day 3 local CSV ingestion, with Day 4 fixture layouts frozen. The Day 1 money type and `/health` endpoint are retained. Day 5 adds local cash replay. Day 7 adds D1 and D4 with proposed matches. No D2, D3, D5, job API run route, PDF, or UI are implemented here.
 
 Local only. No GL posting. Not a compliance certificate.
 
@@ -25,7 +25,7 @@ Every session engine enables SQLite foreign keys. Deletion follows database `ON 
 
 The brief names five job statuses despite saying six: queued, ingested, replayed, detected, failed. Those five are enforced. Day 2 permits zero debit and zero credit together, as specified by its checks; validating an economic journal line is a later ingestion concern.
 
-Next: Day 7 D1 + D4 detectors.
+Next: Day 8 D2 + D5.
 
 
 ## Day 3 — local CSV ingestion
@@ -123,7 +123,7 @@ replayed. The file is staged and atomically replaced; caught database failures
 roll back rows and restore the previous JSON. A filesystem and SQLite are not a
 single crash-atomic transaction: rerun replay after an abrupt process interruption.
 Use a dedicated session because replay flushes and commits pending edits.
-No findings, matches, or later-day outputs are created by replay.
+No findings, matches, or later-day outputs are created by replay itself.
 
 
 ## Day 6 - opening evidence and replay freeze
@@ -159,5 +159,56 @@ future discrepancy. Its replay still seeds 100000 and ends at 125000 with
 identity_ok=True; a book-based path would end at 65000. This separates the
 arithmetic replay from the opening evidence without implementing a detector.
 
-`expected_findings.json` records the future D1 result only. No detector package,
-matching, PDF, API run route, or UI has been added in this checkout.
+At the Day 6 checkpoint, `expected_findings.json` recorded the future D1 result only. Day 7 implements that D1 result and D4 proposals as described below.
+
+
+## Day 7 - D1 and D4
+
+```python
+from ledgertrace.db.session import SessionLocal
+from ledgertrace.detect.run_d1_d4 import run_d1_d4
+
+with SessionLocal() as session:
+    counts = run_d1_d4(session, job_id)
+    print(counts["matches"], counts["finding_counts"])
+```
+
+Run `pytest tests/test_detect_d1_d4.py tests/test_replay.py tests/test_ingest.py -q`.
+The runner refreshes replay, runs D1 and D4, replaces the three Day 7 finding
+scopes, and commits status `detected`. Counts include proposed matches and
+FAIL/UNKNOWN/INFO from D1/D4 only. Ingest's `unbalanced_entry` is preserved.
+`run_d1` is read-only and requires an existing replay; if used directly, replay
+after any source or config change. `run_d4` writes match proposals within the
+caller's transaction and returns findings; it does not commit by itself.
+
+D1 uses `opening_basis`: claimed mode does not produce an opening failure.
+Books-preperiod discrepancies cite the prior cash lines and carry expected,
+implied, and absolute delta cents. Missing expected opening creates a cited
+UNKNOWN. Claimed closing disagreement and bank/GL divergence are independent
+FAILs, with stable suffixes `opening`, `closing`, and `bank_vs_gl` respectively.
+
+D4 uses only in-period bank rows and non-void, in-period cash GL lines. Sorted
+bank date/ID and journal date/creation/entry ID/line ID determine greedy order.
+All exact date/signed-amount proposals (Pass A, confidence 100) are made before
+any off-date matching. Pass B requires a unique remaining GL candidate of the
+same signed amount within three calendar days (confidence 90). Pass C uses a
+unique exact normalized description with the same amount/date tolerance
+(confidence 90). Normalization lowercases, collapses whitespace, and removes
+#digit runs longer than four digits; it does no fuzzy matching. B/C proposals
+produce INFO. Unmatched bank and cash GL lines produce separately scoped FAILs.
+The fixed entry-level journal memo is used for description comparison.
+
+**Matches are proposals for review, never postings.** One-to-one assignment is
+enforced before writing; no schema migration is needed. Repeat runs replace
+matches and resolved findings, even if the new finding list is empty. Other jobs
+and ingest findings are untouched. D1/D4 database writes share a transaction;
+replay is an earlier committed checkpoint, with its existing JSON persistence.
+
+The pasted Day 7 brief truncates parts of the opening failure and matching
+algorithm. These sections follow the prior V1 exact-date/unique-three-day/exact-
+description rules and the Day 6 opening helper contract. Happy has three exact
+matches and no D1/D4 FAILs. D1's opening discrepancy is 60000 cents. D4 has three
+matches, unmatched bank -12345, unmatched GL +20000, and a separate D1 bank/GL
+roll-forward failure for 32345 cents. The frozen D4 expected-findings file lists
+its two matching failures; D1 divergence is additionally asserted in Day 7 tests.
+No CSV amounts, replay behavior, or database schema were changed for Day 7.
