@@ -11,18 +11,21 @@ from .csv_gl import parse_gl
 from .errors import IngestError
 from .hashing import sha256_bytes
 from .job_config import JobConfig
+from .metadata import metadata_path, write_metadata
 
 
 def ingest_job(session, bank_path, gl_path, config: JobConfig) -> Job:
     """Use a dedicated session. Failed attempts do not leave a failed Job row."""
     if session.new or session.dirty or session.deleted:
         raise IngestError("ingest_job requires a session without pending changes")
+    metadata_file = None
+    metadata = {}
     try:
         errors, parsed, snapshots = [], {}, {}
         for kind, path, parser in (("bank", bank_path, parse_bank), ("gl", gl_path, parse_gl)):
             try:
                 snapshots[kind] = Path(path).read_bytes()
-                parsed[kind] = parser(path, config.currency, data=snapshots[kind])
+                parsed[kind] = parser(path, config.currency, data=snapshots[kind], **({"metadata": metadata} if kind == "gl" else {}))
             except IngestError as error:
                 errors.extend(error.errors)
             except OSError as error:
@@ -69,9 +72,13 @@ def ingest_job(session, bank_path, gl_path, config: JobConfig) -> Job:
                     cite_line_ids_json=json.dumps(line_ids), cite_bank_ids_json="[]",
                     payload_json=json.dumps({"debit_cents": debit, "credit_cents": credit, "source_journal_id": jid})))
         job.status = "ingested"
+        metadata_file = metadata_path(job.id)
+        write_metadata(job, metadata)
         session.commit()
         return job
     except Exception as error:
         session.rollback()
+        if metadata_file is not None:
+            metadata_file.unlink(missing_ok=True)
         if isinstance(error, IngestError): raise
         raise IngestError(str(error)) from error

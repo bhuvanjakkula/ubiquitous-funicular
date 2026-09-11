@@ -11,7 +11,7 @@ from ledgertrace.ingest.job_config import load_job_config
 from ledgertrace.ingest.service import ingest_job
 
 fixtures_dir = Path(__file__).parent / "fixtures"
-INGEST_FIXTURES = frozenset({"happy", "d4_unmatched", "unbalanced_je", "alias_headers", "d1_opening_break"})
+INGEST_FIXTURES = frozenset({"happy", "d4_unmatched", "unbalanced_je", "alias_headers", "d1_opening_break", "d2_edited_after_clear", "d5_after_close"})
 
 
 @pytest.fixture
@@ -38,3 +38,8 @@ def ingest_fixture(name: str, session: Session) -> Job:
         session, folder / "bank.csv", folder / "gl.csv",
         load_job_config(folder / "job.json"),
     )
+
+
+@pytest.fixture(autouse=True)
+def ingest_files(tmp_path, monkeypatch):
+    monkeypatch.setenv("LEDGERTRACE_DATA_DIR", str(tmp_path / "data"))

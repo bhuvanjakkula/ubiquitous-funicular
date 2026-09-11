@@ -7,7 +7,9 @@ from ledgertrace.db.ids import scoped_id
 from ledgertrace.db.models import Job, BankLine, JournalEntry, JournalLine, Finding, Match
 from ledgertrace.money import LIMIT
 
-DETECTOR_IDS = frozenset({"beginning_balance_break", "unmatched_bank", "unmatched_gl"})
+D1_D4_IDS = frozenset({"beginning_balance_break", "unmatched_bank", "unmatched_gl"})
+D2_D5_IDS = frozenset({"edited_after_clear", "period_mutation_after_close"})
+DETECTOR_IDS = D1_D4_IDS | D2_D5_IDS
 
 
 class DetectorError(ValueError):
@@ -91,14 +93,14 @@ def stable_suffix(result):
 def persist_findings(session, job_id: str, findings: list[FindingOut], *, detector_ids=None) -> None:
     """Replace incoming detector scopes, or explicit scopes even for zero results.
 
-    The runner supplies all three Day 7 IDs so resolved findings disappear.
+    Each runner supplies its own detector IDs so resolved findings disappear.
     Ingest's unbalanced_entry and other jobs are never in the replacement scope.
     No commit: the runner owns the detector transaction.
     """
     incoming = {f.detector_id for f in findings}
     scope = incoming if detector_ids is None else set(detector_ids)
     if not incoming <= scope or not scope <= DETECTOR_IDS:
-        raise DetectorError("invalid Day 7 finding replacement scope")
+        raise DetectorError("invalid finding replacement scope")
     records = []
     ids = set()
     for f in findings:

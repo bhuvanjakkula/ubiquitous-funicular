@@ -212,3 +212,48 @@ matches, unmatched bank -12345, unmatched GL +20000, and a separate D1 bank/GL
 roll-forward failure for 32345 cents. The frozen D4 expected-findings file lists
 its two matching failures; D1 divergence is additionally asserted in Day 7 tests.
 No CSV amounts, replay behavior, or database schema were changed for Day 7.
+
+
+## Day 8 - D2 and D5 timestamp detectors
+
+```python
+from ledgertrace.detect.run_d2_d5 import run_d2_d5
+
+# After ingest; replay is not needed for these timestamp-only checks.
+result = run_d2_d5(session, job.id)
+```
+
+`run_d2` and `run_d5` return cited proposals without committing. The runner
+replaces only `edited_after_clear` and `period_mutation_after_close` findings,
+commits status `detected`, and returns per-severity counts. It preserves D1/D4
+findings, ingest findings, matches, and replay. `detected` indicates a detector
+run completed, not that every detector has run. Day 7 reruns preserve Day 8.
+
+D2 inspects lines with a true cleared flag or a cleared date. It fails when the
+entry modification date is strictly after clearing and differs from the entry
+creation date. A cleared flag without a clear date yields UNKNOWN. D5 inspects
+entries dated on or before period_end (including pre-period entries). Modification
+and creation strictly after the job close date produce separate failures; a
+missing close date yields UNKNOWN. Both rules compare calendar dates, use the
+normalized entry timestamps, and include void entries as timestamp evidence.
+
+Ingest now atomically writes `data/jobs/{job_id}/ingest_metadata.json` (under
+`LEDGERTRACE_DATA_DIR` when configured). Version 1 records the GL SHA-256,
+canonical column names after alias resolution, and data-row numbers missing
+creation/modification values. Existing ingest date defaults remain unchanged.
+A missing modification column gives one UNKNOWN per detector, rather than a
+false clean result from fallback dates. D5 still checks observed creation dates;
+missing creation columns also yield UNKNOWN. Blank timestamps yield UNKNOWN for
+the affected entry/check (or cleared line in D2). D2 also yields UNKNOWN when
+both clearing columns are absent. Incomplete entry timestamps are conservatively
+unknown even if another line in that entry supplies a date.
+
+Missing, malformed, or hash-mismatched metadata yields UNKNOWN. Re-ingest legacy
+jobs from their original exports to obtain this evidence; do not infer column
+presence from normalized dates. Failed ingestion removes its metadata file.
+No database or CSV schema changed.
+
+Run `pytest tests/test_detect_d2_d5.py -q`, or `pytest tests -q` for regressions.
+The D2 fixture yields one cleared-line failure. D5 yields two post-close edit
+failures plus one backdated-creation failure. Happy yields no timestamp findings.
+D3 remains a placeholder for Day 9.

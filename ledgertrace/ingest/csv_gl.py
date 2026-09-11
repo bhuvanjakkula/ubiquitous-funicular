@@ -5,8 +5,12 @@ from .parse_money import parse_optional_cents
 from .errors import IngestError
 
 
-def parse_gl(path, currency="USD", *, data=None):
+def parse_gl(path, currency="USD", *, data=None, metadata=None):
     rows, mapping, errors = read_rows(path, GL_ALIASES, {"journal_id", "txn_date", "account_id"}, ("debit", "credit"), data)
+    if metadata is not None:
+        metadata.update(columns=sorted(mapping), missing={
+            field: [number for number, row, _ in rows if not row.get(field)]
+            for field in ("created_at", "modified_at")})
     result, seen = [], set()
     for number, row, _ in rows:
         before = len(errors)

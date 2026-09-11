@@ -1,0 +1,10 @@
+{
+  "fail": [
+    {
+      "detector_id": "edited_after_clear",
+      "title": "Cleared line later modified"
+    }
+  ],
+  "unknown": [],
+  "info": []
+}

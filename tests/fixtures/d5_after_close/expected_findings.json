@@ -1,0 +1,18 @@
+{
+  "fail": [
+    {
+      "detector_id": "period_mutation_after_close",
+      "title": "Period books mutated after close date"
+    },
+    {
+      "detector_id": "period_mutation_after_close",
+      "title": "Period books mutated after close date"
+    },
+    {
+      "detector_id": "period_mutation_after_close",
+      "title": "Backdated entry created after close"
+    }
+  ],
+  "unknown": [],
+  "info": []
+}
