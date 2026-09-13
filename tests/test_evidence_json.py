@@ -45,7 +45,7 @@ def test_happy_evidence_no_fail_actions(session):
     assert result["finding_counts"] == {"FAIL": 0, "UNKNOWN": 0, "INFO": 0}
     pack, = session.scalars(select(EvidencePack)).all()
     assert pack.id == job.id + ":evidence" and Path(pack.json_path).is_file()
-    assert pack.pdf_path == "" and pack.created_at is not None
+    assert Path(pack.pdf_path).read_bytes().startswith(b"%PDF") and pack.created_at is not None
 
 
 def test_d4_evidence_lists_unmatched_and_bank_vs_gl(session):

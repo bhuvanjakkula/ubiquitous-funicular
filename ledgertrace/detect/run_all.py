@@ -3,6 +3,7 @@ from sqlalchemy import func, select
 from ledgertrace.db.models import Job, Finding, Match
 from ledgertrace.evidence.pack import atomic_write, evidence_path, write_evidence_json
 from ledgertrace.replay.engine import replay_job
+from ledgertrace.evidence.pdf import write_evidence_pdf
 from .base import DETECTOR_IDS, persist_findings
 from .beginning_balance import run_d1
 from .edited_after_clear import run_d2
@@ -42,6 +43,8 @@ def run_all(session, job_id: str) -> dict:
     rf = replay_job(session, job_id)
     path = evidence_path(job_id)
     previous = path.read_bytes() if path.exists() else None
+    pdf_path = path.with_suffix(".pdf")
+    previous_pdf = pdf_path.read_bytes() if pdf_path.exists() else None
     writing = False
     try:
         findings = (run_d1(session, job_id) + run_d2(session, job_id) + run_d3(session, job_id)
@@ -51,6 +54,8 @@ def run_all(session, job_id: str) -> dict:
         session.flush()
         writing = True
         pack = write_evidence_json(session, job_id, rf)
+        write_evidence_pdf(pack)
+        session.flush()
         counts = counts_by_severity_and_detector(session, job_id)
         result = {
             "job_id": job_id, "status": job.status,
@@ -58,14 +63,16 @@ def run_all(session, job_id: str) -> dict:
             "finding_counts_by_detector": counts["by_detector"],
             "matches": session.scalar(select(func.count()).select_from(Match).where(Match.job_id == job_id)),
             "evidence_json": pack.json_path,
+            "evidence_pdf": pack.pdf_path,
         }
         session.commit()
         return result
     except Exception:
         session.rollback()
         if writing:
-            if previous is None:
-                path.unlink(missing_ok=True)
-            elif not path.exists() or path.read_bytes() != previous:
-                atomic_write(path, previous)
+            for artifact, old in ((path, previous), (pdf_path, previous_pdf)):
+                if old is None:
+                    artifact.unlink(missing_ok=True)
+                elif not artifact.exists() or artifact.read_bytes() != old:
+                    atomic_write(artifact, old)
         raise
