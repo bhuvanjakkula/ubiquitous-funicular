@@ -10,5 +10,6 @@
   "expected_opening_cash_cents": 100000,
   "expected_closing_cash_cents": null,
   "export_dialect": "generic",
-  "expected_bank_statement_ending_cents": 120000
+  "expected_bank_statement_ending_cents": 120000,
+  "license_key": "test_key"
 }

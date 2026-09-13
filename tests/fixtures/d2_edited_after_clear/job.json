@@ -8,5 +8,6 @@
   "period_end": "2025-12-31",
   "period_close_date": "2026-01-15",
   "expected_opening_cash_cents": 100000,
-  "expected_closing_cash_cents": null
+  "expected_closing_cash_cents": null,
+  "license_key": "test_key"
 }

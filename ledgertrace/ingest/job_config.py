@@ -17,6 +17,7 @@ class JobConfig(BaseModel):
     expected_bank_statement_ending_cents: StrictInt | None = Field(default=None, ge=-LIMIT, le=LIMIT)
     export_dialect: Literal["generic", "qbo", "xero"] = "generic"
     software_version: str = "0.1.0"
+    license_key: str | None = None
 
     @field_validator("entity_name")
     @classmethod

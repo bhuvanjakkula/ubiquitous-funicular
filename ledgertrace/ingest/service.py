@@ -34,7 +34,7 @@ def ingest_job(session, bank_path, gl_path, config: JobConfig) -> Job:
                 errors.append({"file": str(path), "row": 0, "message": str(error)})
         if errors: raise IngestError(errors)
         job_id = uuid4().hex
-        values = config.model_dump(exclude={"cash_account_ids"})
+        values = config.model_dump(exclude={"cash_account_ids", "license_key"})
         job = Job(id=job_id, status="queued", cash_account_ids_json=json.dumps(config.cash_account_ids),
                   input_bank_sha256=sha256_bytes(snapshots["bank"]), input_gl_sha256=sha256_bytes(snapshots["gl"]), **values)
         session.add(job)

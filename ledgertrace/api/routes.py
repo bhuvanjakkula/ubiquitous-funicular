@@ -21,6 +21,7 @@ from ledgertrace.ingest.errors import IngestError
 from ledgertrace.ingest.job_config import JobConfig
 from ledgertrace.ingest.service import ingest_job
 from .deps import get_db
+from .license import validate_license_key
 
 router = APIRouter()
 
@@ -59,6 +60,10 @@ async def create_job(request: Request, session: Session = Depends(get_db)):
             if not isinstance(raw_config, (str, bytes)):
                 error(400, "INGEST_ERROR", "config JSON is required", missing_fields=["config"])
             config = JobConfig.model_validate_json(raw_config)
+            
+            # Validate license key before allowing ingest
+            validate_license_key(config.license_key)
+            
             upload_root = Path(os.environ.get("LEDGERTRACE_DATA_DIR", "data")) / "uploads"
             upload_root.mkdir(parents=True, exist_ok=True)
             with TemporaryDirectory(dir=upload_root, prefix="ingest-") as directory:
@@ -73,9 +78,9 @@ async def create_job(request: Request, session: Session = Depends(get_db)):
                 return dict(job_id=job.id, status=job.status)
     except IngestError as exc:
         missing = sorted({field for item in exc.errors for field in item.get("missing_fields", [])})
-        error(400, "INGEST_ERROR", str(exc), **({"missing_fields": missing} if missing else {}))
+        print("INGEST ERROR:", repr(exc)); error(400, "INGEST_ERROR", str(exc), **({"missing_fields": missing} if missing else {}))
     except ValidationError as exc:
-        error(400, "INGEST_ERROR", str(exc))
+        print("INGEST ERROR:", repr(exc)); error(400, "INGEST_ERROR", str(exc))
 
 
 @router.get("/jobs/{job_id}")
