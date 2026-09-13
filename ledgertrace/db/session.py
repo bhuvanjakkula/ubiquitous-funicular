@@ -1,5 +1,6 @@
 """SQLite sessions with enforced foreign keys; timestamps are naive UTC."""
 from contextlib import contextmanager
+import os
 from pathlib import Path
 from typing import Iterator
 from sqlalchemy import Engine, create_engine, event
@@ -14,7 +15,7 @@ def create_data_dir() -> None:
 
 
 def engine_from_url(url: str | None = None) -> Engine:
-    db_url = make_url(url or DEFAULT_URL)
+    db_url = make_url(url or os.environ.get("LEDGERTRACE_DATABASE_URL", DEFAULT_URL))
     is_sqlite = db_url.get_backend_name() == "sqlite"
     if is_sqlite and db_url.database not in (None, "", ":memory:"):
         Path(db_url.database).parent.mkdir(parents=True, exist_ok=True)
