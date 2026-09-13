@@ -48,3 +48,44 @@ def resolve_headers(headers, aliases):
                 mapping[logical] = found[norm_header(candidate)]
                 break
     return mapping
+
+
+QBO_BANK_ALIASES = {
+ "posted_date": {"date", "transaction date", "posted on"}, "amount": {"original amount"},
+ "description": {"memo", "payee", "name", "bank detail"},
+ "bank_line_id": {"fitid", "ref no.", "ref no", "num", "transaction id"},
+ "type": {"type", "transaction type"}, "debit": {"spend", "payment", "money out", "withdrawal"},
+ "credit": {"receive", "deposit", "money in"},
+}
+QBO_GL_ALIASES = {
+ "journal_id": {"trans #", "transaction #", "num", "journal no.", "doc no."},
+ "txn_date": {"date", "transaction date"}, "account_id": {"account", "account #", "account no."},
+ "account_name": {"account name"}, "debit": {"debit", "debit amount"}, "credit": {"credit", "credit amount"},
+ "memo": {"memo", "description", "name", "payee"}, "created_at": {"created", "entered"},
+ "modified_at": {"last modified", "modified"}, "cleared_flag": {"clr", "reconciled", "✓", "r"},
+ "line_id": {"line", "split id"},
+}
+XERO_BANK_ALIASES = {
+ "posted_date": {"date", "bank transaction date"}, "amount": {"amount"},
+ "description": {"payee", "particulars", "description", "reference", "code"},
+ "bank_line_id": {"banktransactionid", "reference", "id"},
+ "debit": {"spent", "debit"}, "credit": {"received", "credit"},
+}
+XERO_GL_ALIASES = {
+ "journal_id": {"journalnumber", "journal number", "narration"}, "txn_date": {"journaldate", "date"},
+ "account_id": {"accountcode", "account code"}, "account_name": {"accountname", "account name"},
+ "debit": {"debit"}, "credit": {"credit"}, "memo": {"narration", "description", "trackingname1"},
+ "line_id": {"journallineid"},
+}
+
+
+def aliases_for(dialect):
+    from .errors import IngestError
+    if dialect not in ("generic", "qbo", "xero"):
+        raise IngestError("unknown export_dialect: " + str(dialect))
+    bank, gl = ({k: set(v) for k, v in base.items()} for base in (BANK_ALIASES, GL_ALIASES))
+    if dialect != "generic":
+        extras = (QBO_BANK_ALIASES, QBO_GL_ALIASES) if dialect == "qbo" else (XERO_BANK_ALIASES, XERO_GL_ALIASES)
+        for target, extra in zip((bank, gl), extras):
+            for field, names in extra.items(): target[field].update(names)
+    return bank, gl

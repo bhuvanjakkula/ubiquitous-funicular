@@ -7,6 +7,7 @@ from ledgertrace.db.ids import scoped_id
 from ledgertrace.db.models import Job, BankLine, JournalEntry, JournalLine, Finding
 from ledgertrace.money import LIMIT
 from .csv_bank import parse_bank
+from .aliases import aliases_for
 from .csv_gl import parse_gl
 from .errors import IngestError
 from .hashing import sha256_bytes
@@ -21,11 +22,12 @@ def ingest_job(session, bank_path, gl_path, config: JobConfig) -> Job:
     metadata_file = None
     metadata = {}
     try:
+        bank_aliases, gl_aliases = aliases_for(config.export_dialect)
         errors, parsed, snapshots = [], {}, {}
         for kind, path, parser in (("bank", bank_path, parse_bank), ("gl", gl_path, parse_gl)):
             try:
                 snapshots[kind] = Path(path).read_bytes()
-                parsed[kind] = parser(path, config.currency, data=snapshots[kind], **({"metadata": metadata} if kind == "gl" else {}))
+                parsed[kind] = parser(path, config.currency, aliases=bank_aliases if kind == "bank" else gl_aliases, data=snapshots[kind], **({"metadata": metadata} if kind == "gl" else {}))
             except IngestError as error:
                 errors.extend(error.errors)
             except OSError as error:

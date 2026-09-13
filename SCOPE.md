@@ -12,3 +12,8 @@ LLMs inside detectors; auto-fix that writes the GL.
 
 ## First allowed V2 after revenue
 One narrow check a customer requested in writing. Still no posting.
+
+## Authorized V2.1 exception
+Optional statement-ending claim test, generic/QBO/Xero CSV header dialects, and
+conditional unposted draft journals in evidence JSON/PDF. This is not a connector,
+posting endpoint, GL journal export, or accounting standards pack. V2.2 is out.

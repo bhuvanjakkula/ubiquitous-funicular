@@ -1,0 +1,4 @@
+Date,Spent,Received,Payee,Particulars,Reference
+2025-01-15,,500.00,Acme,Customer deposit,b1
+2025-01-16,200.00,,Landlord,Office rent,b2
+2025-01-17,50.00,,Bank,Bank fee,b3

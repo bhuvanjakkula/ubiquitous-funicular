@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Literal
 from pathlib import Path
 from pydantic import BaseModel, Field, StrictInt, field_validator, model_validator
 from ledgertrace.money import LIMIT
@@ -13,6 +14,8 @@ class JobConfig(BaseModel):
     period_close_date: date | None = None
     expected_opening_cash_cents: StrictInt | None = Field(default=None, ge=-LIMIT, le=LIMIT)
     expected_closing_cash_cents: StrictInt | None = Field(default=None, ge=-LIMIT, le=LIMIT)
+    expected_bank_statement_ending_cents: StrictInt | None = Field(default=None, ge=-LIMIT, le=LIMIT)
+    export_dialect: Literal["generic", "qbo", "xero"] = "generic"
     software_version: str = "0.1.0"
 
     @field_validator("entity_name")

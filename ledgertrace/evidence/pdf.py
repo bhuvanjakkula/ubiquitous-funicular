@@ -6,7 +6,7 @@ from xml.sax.saxutils import escape
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_RIGHT
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
 from .pack import atomic_write
 
 
@@ -55,6 +55,19 @@ def write_evidence_pdf(pack):
         story.append(p("Proposed review actions", "Heading2"))
         for action in body["proposed_review_actions"]:
             story.append(p(action["finding_id"] + ": " + action["note"], "SmallText"))
+    if body.get("proposed_draft_jes"):
+        story += [PageBreak(), p("Draft journals (not posted)", "Heading1"), p(body["draft_disclaimer"], "SmallText")]
+        for draft in body["proposed_draft_jes"]:
+            story += [p(draft["draft_id"], "Heading3"), p(draft["status"] + " | " + draft["txn_date"], "SmallText"),
+                      p(draft["memo"], "SmallText"), p("Source findings: " + ", ".join(draft["source_finding_ids"]), "SmallText")]
+            if draft["lines"]:
+                rows = [["Account", "Debit cents", "Credit cents"]]
+                rows += [[p(line["account_id"] + " " + line.get("account_name", ""), "SmallText"),
+                          str(line["debit_cents"]), str(line["credit_cents"])] for line in draft["lines"]]
+                draft_table = Table(rows, colWidths=[280,100,100], hAlign="LEFT")
+                draft_table.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0),colors.whitesmoke),
+                    ("VALIGN",(0,0),(-1,-1),"TOP"),("BOTTOMPADDING",(0,0),(-1,-1),7)]))
+                story += [draft_table, p("Balanced: " + str(draft["balanced"]), "SmallText")]
     def footer(canvas, doc):
         canvas.saveState()
         canvas.setFont("Helvetica", 8)

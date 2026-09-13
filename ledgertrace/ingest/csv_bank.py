@@ -6,8 +6,8 @@ from .parse_money import parse_amount_to_cents, parse_optional_cents
 from .errors import IngestError
 
 
-def parse_bank(path, currency="USD", *, data=None):
-    rows, mapping, errors = read_rows(path, BANK_ALIASES, {"posted_date", "description"}, ("amount", "debit", "credit"), data)
+def parse_bank(path, currency="USD", *, aliases=None, data=None):
+    rows, mapping, errors = read_rows(path, aliases if aliases is not None else BANK_ALIASES, {"posted_date", "description"}, ("amount", "debit", "credit"), data)
     split = {"debit", "credit"} <= mapping.keys() or "amount" not in mapping
     result, seen = [], set()
     for number, row, raw in rows:

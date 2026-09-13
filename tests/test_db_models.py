@@ -111,7 +111,7 @@ def test_alembic_upgrade_creates_tables(tmp_path):
         assert all(f["options"].get("ondelete") == "CASCADE" for f in inspector.get_foreign_keys(name))
     with engine.connect() as connection:
         assert connection.scalar(text("PRAGMA integrity_check")) == "ok"
-        assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "0001"
+        assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "0003"
     engine.dispose()
     command.downgrade(config, "base")
     engine = engine_from_url(url)

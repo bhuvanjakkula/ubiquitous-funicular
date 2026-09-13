@@ -5,8 +5,8 @@ from .parse_money import parse_optional_cents
 from .errors import IngestError
 
 
-def parse_gl(path, currency="USD", *, data=None, metadata=None):
-    rows, mapping, errors = read_rows(path, GL_ALIASES, {"journal_id", "txn_date", "account_id"}, ("debit", "credit"), data)
+def parse_gl(path, currency="USD", *, aliases=None, data=None, metadata=None):
+    rows, mapping, errors = read_rows(path, aliases if aliases is not None else GL_ALIASES, {"journal_id", "txn_date", "account_id"}, ("debit", "credit"), data)
     if metadata is not None:
         # Capture source headers before applying any timestamp defaults.
         import csv

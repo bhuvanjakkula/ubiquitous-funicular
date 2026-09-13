@@ -187,3 +187,53 @@ repeat runs, and rollback. No new detectors are part of this freeze.
 Professional review required. Authors are not the user's CPA.
 No separate license grant is implied by this README. See DISCLAIMER.md and
 SCOPE.md for the product boundaries. V1 is frozen; do not build V2 speculatively.
+
+
+## V2.1 - statement ending and conditional draft journals
+
+V2.1 is a separately authorized extension to the frozen V1 baseline. It remains
+local-only, with no QBO/Xero API, posting, or GAAP/IFRS rule packs.
+
+Before starting the updated API against an existing V1 database, stop the API
+and run `alembic upgrade head`. Revision `0003` follows `0001` and adds only
+`jobs.expected_bank_statement_ending_cents` (nullable integer) and
+`jobs.export_dialect` (generic by default, restricted to generic/qbo/xero).
+Existing job and child rows are preserved. If V1 tables were created by the API
+and have no Alembic version, first verify they match revision 0001, back up the
+SQLite file, and use `alembic stamp 0001` before upgrading. Do not stamp an
+unknown schema. `create_all` creates a fresh database
+but cannot upgrade an existing one. For a custom database, set sqlalchemy.url
+in your Alembic configuration to the same database used by the API.
+
+Job JSON and the upload form accept:
+
+```json
+{"export_dialect": "generic", "expected_bank_statement_ending_cents": 120000}
+```
+
+These keys supplement the usual required job fields. `export_dialect` may be
+`generic`, `qbo`, or `xero`; unknown values are rejected. Dialect-specific aliases
+are unioned into independent copies of the generic maps. Reconcile marks R, C,
+Y, and the check mark are true. This handles CSV exports only, not live product
+integrations. Canonical headers still take precedence. Missing edit columns
+retain the V1 UNKNOWN behavior; the dialect fixtures have zero FAILs, not
+necessarily zero UNKNOWNs.
+
+`statement_ending_break` silently skips an absent/null statement claim. With a
+claim, it compares against the absolute bank roll-forward and flags the absolute
+difference. With no opening cash, it returns UNKNOWN because V1's stored bank
+ending is relative. V1 replay math is unchanged. The statement fixture claims
+120000 against bank/GL ending 125000 and produces a 5000-cent FAIL.
+
+Evidence JSON now contains `proposed_draft_jes` and `draft_disclaimer`. PDF ends
+with a draft-journal section when drafts exist. Every draft has status
+`DRAFT_NOT_POSTED`. Opening suggestions are explicitly conditional on the claim
+being correct, not a command to force the books to it. Statement ties produce
+cash/suspense suggestions only when bank and GL already agree; otherwise two
+inspect-only notes require reconciliation first. Unmatched bank suggestions use
+suspense; unmatched cash GL yields inspect-only with no lines, never a second
+posting. Journal suggestions balance in integer cents. Cash defaults to the first
+configured cash account and requires human confirmation; no allocation is inferred.
+
+V1 fixture amounts remain unchanged. Happy still has zero FAILs and no drafts.
+Run `pytest tests/test_v2_1.py -q` and `pytest -q`. No V2.2 work is included.

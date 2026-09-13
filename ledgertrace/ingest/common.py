@@ -6,7 +6,7 @@ from pathlib import Path
 from .aliases import resolve_headers
 from .errors import IngestError
 
-TRUE = {"1", "true", "t", "yes", "y", "x", "r", "cleared", "reconciled"}
+TRUE = {"c", "✓","1", "true", "t", "yes", "y", "x", "r", "cleared", "reconciled"}
 FALSE = {"0", "false", "f", "no", "n", "", "unchecked"}
 
 

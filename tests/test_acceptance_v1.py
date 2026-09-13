@@ -113,7 +113,7 @@ def test_a5_readme():
 
 def test_frozen_detector_and_api_scope():
     assert DETECTOR_IDS == {"beginning_balance_break", "edited_after_clear", "duplicate_event",
-                            "unmatched_bank", "unmatched_gl", "period_mutation"}
+                            "unmatched_bank", "unmatched_gl", "period_mutation", "statement_ending_break"}
     posts = {path for path, operations in app.openapi()["paths"].items() if "post" in operations}
     assert posts == {"/api/jobs", "/api/jobs/{job_id}/run"}
     root = Path(__file__).resolve().parents[1] / "ledgertrace"

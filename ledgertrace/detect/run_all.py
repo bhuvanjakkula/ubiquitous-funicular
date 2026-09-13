@@ -10,6 +10,7 @@ from .edited_after_clear import run_d2
 from .duplicate_event import run_d3
 from .unmatched_bank import run_d4
 from .period_mutation import run_d5
+from .statement_ending import run_statement_ending
 
 
 class RunError(ValueError):
@@ -48,7 +49,7 @@ def run_all(session, job_id: str) -> dict:
     writing = False
     try:
         findings = (run_d1(session, job_id) + run_d2(session, job_id) + run_d3(session, job_id)
-                    + run_d4(session, job_id) + run_d5(session, job_id))
+                    + run_d4(session, job_id) + run_statement_ending(session, job_id) + run_d5(session, job_id))
         persist_findings(session, job_id, findings, detector_ids=DETECTOR_IDS)
         job.status = "detected"
         session.flush()

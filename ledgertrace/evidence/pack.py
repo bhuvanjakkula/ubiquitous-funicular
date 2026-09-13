@@ -4,6 +4,7 @@ No commit here: run_all owns persistence and restores the prior file if its
 transaction fails. Direct callers own that same transaction responsibility.
 """
 from collections import Counter
+from .draft_jes import build_draft_jes, DRAFT_DISCLAIMER
 from dataclasses import asdict
 from datetime import datetime, timezone
 import json
@@ -63,6 +64,8 @@ def write_evidence_json(session, job_id: str, rf: RollForward) -> EvidencePack:
             "expected_closing_cash_cents": job.expected_closing_cash_cents,
             "input_bank_sha256": job.input_bank_sha256, "input_gl_sha256": job.input_gl_sha256,
             "software_version": job.software_version, "status": job.status,
+            "expected_bank_statement_ending_cents": job.expected_bank_statement_ending_cents,
+            "export_dialect": job.export_dialect,
         },
         "rollforward": rollforward,
         "matches_summary": {
@@ -79,6 +82,8 @@ def write_evidence_json(session, job_id: str, rf: RollForward) -> EvidencePack:
             "cite_entry_ids": json.loads(f.cite_entry_ids_json),
             "payload": json.loads(f.payload_json),
         } for f in findings],
+        "proposed_draft_jes": build_draft_jes(session, job_id),
+        "draft_disclaimer": DRAFT_DISCLAIMER,
         "proposed_review_actions": [dict(kind="inspect", finding_id=f.id, note=REVIEW_NOTE)
                                     for f in findings if f.severity == "FAIL"],
     }

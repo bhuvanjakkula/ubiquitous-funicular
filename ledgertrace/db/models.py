@@ -19,6 +19,8 @@ class Job(Base):
     period_close_date: Mapped[date | None] = mapped_column(Date)
     expected_opening_cash_cents: Mapped[int | None] = mapped_column(Integer)
     expected_closing_cash_cents: Mapped[int | None] = mapped_column(Integer)
+    expected_bank_statement_ending_cents: Mapped[int | None] = mapped_column(Integer)
+    export_dialect: Mapped[str] = mapped_column(default="generic", server_default="generic")
     cash_account_ids_json: Mapped[str]
     status: Mapped[str]
     input_bank_sha256: Mapped[str | None]
@@ -36,6 +38,7 @@ class Job(Base):
     findings: Mapped[list["Finding"]] = relationship(back_populates="job", passive_deletes="all")
     evidence_packs: Mapped[list["EvidencePack"]] = relationship(back_populates="job", passive_deletes="all")
     __table_args__ = (
+        CheckConstraint("export_dialect IN ('generic','qbo','xero')", name="ck_jobs_export_dialect"),
         CheckConstraint("status IN ('queued','ingested','replayed','detected','failed')", name="ck_jobs_status"),
         CheckConstraint("period_end >= period_start", name="ck_jobs_period"),
     )
