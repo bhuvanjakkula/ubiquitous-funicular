@@ -6,3 +6,7 @@ data/
 ui/node_modules/
 ui/dist/
 *.tsbuildinfo
+
+web/node_modules/
+web/dist/
+web/node_modules-local-link/
