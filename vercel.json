@@ -1,6 +1,12 @@
 {
   "framework": "vite",
-  "buildCommand": "cd web && npm install && npm run build",
+  "buildCommand": "cd web 2>/dev/null || true; npm install && npm run build",
   "outputDirectory": "web/dist",
-  "installCommand": "echo 'Handled in buildCommand'"
+  "installCommand": "echo 'Handled in buildCommand'",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://ubiquitous-funicular-sfqh.onrender.com/api/$1"
+    }
+  ]
 }

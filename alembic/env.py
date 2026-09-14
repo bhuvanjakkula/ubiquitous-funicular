@@ -3,6 +3,7 @@ from alembic import context
 import ledgertrace.db.models  # register all ten tables
 from ledgertrace.db.base import Base
 from ledgertrace.db.session import engine_from_url
+import os
 
 target_metadata = Base.metadata
 config = context.config
@@ -10,7 +11,7 @@ config = context.config
 
 def run_migrations_offline():
     context.configure(
-        url=config.get_main_option("sqlalchemy.url"),
+        url=os.environ.get("LEDGERTRACE_DATABASE_URL", config.get_main_option("sqlalchemy.url")),
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -21,7 +22,7 @@ def run_migrations_offline():
 
 
 def run_migrations_online():
-    engine = engine_from_url(config.get_main_option("sqlalchemy.url"))
+    engine = engine_from_url()
     try:
         with engine.connect() as connection:
             context.configure(connection=connection, target_metadata=target_metadata, render_as_batch=True)
