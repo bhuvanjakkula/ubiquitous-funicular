@@ -1,7 +1,6 @@
 {
-  "framework": "vite",
-  "buildCommand": "cd web 2>/dev/null || true; npm install && npm run build",
-  "outputDirectory": "web/dist",
+  "buildCommand": "cd web && npm install && npm run build && cp -r dist ../dist",
+  "outputDirectory": "dist",
   "installCommand": "echo 'Handled in buildCommand'",
   "rewrites": [
     {
