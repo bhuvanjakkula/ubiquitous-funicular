@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd web && npm install && npm run build && cp -r dist ../dist",
+  "buildCommand": "cd web 2>/dev/null || true; npm install && npm run build && (cp -r dist ../dist 2>/dev/null || true)",
   "outputDirectory": "dist",
   "installCommand": "echo 'Handled in buildCommand'",
   "rewrites": [
