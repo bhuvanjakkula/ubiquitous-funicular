@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://nullmesh-defense-api.onrender.com/api/:path*"
+    }
+  ]
+}
