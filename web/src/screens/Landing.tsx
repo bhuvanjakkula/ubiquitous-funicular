@@ -84,7 +84,7 @@ export default function Landing({ onStart }: { onStart: () => void }) {
               <li>One-click QBO & Xero Exports</li>
               <li>Priority Email Support</li>
             </ul>
-            <a href="https://buy.stripe.com/test_fZu00bgO211z3mLbwy2oE05" target="_blank" rel="noreferrer" style={{textDecoration: 'none'}}>
+            <a href="https://buy.stripe.com/test_4gM7sDgO29y53mL6ce2oE07" target="_blank" rel="noreferrer" style={{textDecoration: 'none'}}>
               <button style={{width: '100%'}}>Get Firm License</button>
             </a>
           </div>
