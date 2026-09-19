@@ -14,6 +14,7 @@ export default function App() {
   const [showAuth, setShowAuth] = useState(false);
   const [role, setRole] = useState<UserRole>('Read-only');
   const [view, setView] = useState<View>('landing');
+  const [jobId, setJobId] = useState('');
 
   if (showAuth && !isAuthenticated) {
     return <Auth onLogin={(selectedRole) => {
@@ -67,8 +68,8 @@ export default function App() {
         {view === 'security' && <SecurityAuditLog />}
         {view === 'upload' && (
           <Upload 
-            jobId={""} 
-            onCreated={() => {}} 
+            jobId={jobId} 
+            onCreated={setJobId} 
             onRun={() => setView('dashboard')} 
           />
         )}
