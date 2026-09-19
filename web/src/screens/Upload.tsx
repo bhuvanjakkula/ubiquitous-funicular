@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
-import { DISCLAIMER } from '../api';
+import { createJob, runJob, DISCLAIMER } from '../api';
+import { previewCsv } from '../csv';
 
 type ExtractionStatus = 'idle' | 'uploading' | 'extracting' | 'validating' | 'done';
 
@@ -27,6 +28,12 @@ export default function Upload({ jobId, onCreated, onRun }: { jobId: string, onC
   const [fileName, setFileName] = useState('');
   const [extracted, setExtracted] = useState<ExtractedData | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [bank, setBank] = useState<File>();
+  const [gl, setGl] = useState<File>();
+  const [previews, setPreviews] = useState<Record<string, string[][]>>({});
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
 
   const simulateExtraction = () => {
     setStatus('extracting');
@@ -60,6 +67,65 @@ export default function Upload({ jobId, onCreated, onRun }: { jobId: string, onC
       simulateExtraction();
     }
   };
+
+  async function file(kind: string, f?: File) {
+    if (kind === 'bank') setBank(f);
+    else setGl(f);
+    setPreviews(p => ({ ...p, [kind]: [] }));
+    if (f) {
+      const rows = previewCsv(await f.text());
+      setPreviews(p => ({ ...p, [kind]: rows }));
+    }
+  }
+
+  async function create(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!bank || !gl) return;
+    setBusy(true);
+    setError('');
+    const form = new FormData(e.currentTarget);
+    const optional = (key: string) => {
+      const raw = String(form.get(key) || '');
+      if (!raw) return null;
+      const n = Number(raw);
+      if (!Number.isSafeInteger(n)) throw Error(key + ' must be integer cents');
+      return n;
+    };
+    try {
+      const config = {
+        entity_name: form.get('entity_name'),
+        currency: form.get('currency'),
+        cash_account_ids: String(form.get('cash_account_ids')).split(',').map(s => s.trim()).filter(Boolean),
+        period_start: form.get('period_start'),
+        period_end: form.get('period_end'),
+        period_close_date: form.get('period_close_date') || null,
+        expected_opening_cash_cents: optional('expected_opening_cash_cents'),
+        expected_closing_cash_cents: optional('expected_closing_cash_cents'),
+        expected_bank_statement_ending_cents: optional('expected_bank_statement_ending_cents'),
+        export_dialect: form.get('export_dialect'),
+        license_key: form.get('license_key')
+      };
+      const r = await createJob(bank, gl, config);
+      onCreated(r.job_id);
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function run() {
+    setBusy(true);
+    setError('');
+    try {
+      await runJob(jobId);
+      onRun();
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
 
   if (status === 'validating' && extracted) {
     return (
@@ -120,44 +186,116 @@ export default function Upload({ jobId, onCreated, onRun }: { jobId: string, onC
     <section>
       <p className="eyebrow">01 / IMPORT HUB</p>
       <h1>Document Intelligence Center</h1>
-      <p className="sub">Upload PDF invoices or receipts. Our OCR engine extracts and validates the data automatically.</p>
+      <p className="sub">Upload PDF invoices or CSV bank/GL exports. Our system handles both seamlessly.</p>
       <p className="notice">{DISCLAIMER}</p>
       
-      <div 
-        className="upload-zone"
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={handleFileDrop}
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <input 
-          type="file" 
-          ref={fileInputRef} 
-          style={{ display: 'none' }} 
-          accept="application/pdf"
-          onChange={handleFileSelect}
-        />
-        
-        {status === 'idle' ? (
-          <>
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '1rem', color: 'var(--accent-gold)' }}>
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="17 8 12 3 7 8"></polyline>
-              <line x1="12" y1="3" x2="12" y2="15"></line>
-            </svg>
-            <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Drag & Drop PDF Invoice</h3>
-            <p style={{ color: 'var(--text-secondary)' }}>or click to browse local files</p>
-          </>
-        ) : (
-          <div style={{ width: '100%', maxWidth: '300px' }}>
-            <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>
-              {progress < 40 ? 'Extracting text...' : progress < 80 ? 'Identifying PO/Supplier...' : 'Parsing Line Items...'}
-            </h3>
-            <div style={{ width: '100%', height: '6px', background: 'var(--bg-secondary)', borderRadius: '3px', overflow: 'hidden' }}>
-              <div style={{ width: `${progress}%`, height: '100%', background: 'var(--accent-gold)', transition: 'width 0.3s ease' }}></div>
+      <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+        <div style={{ flex: '1 1 300px' }}>
+          <div className="panel" style={{height: '100%'}}>
+            <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>PDF Invoice Extraction</h2>
+            <div 
+              className="upload-zone"
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={handleFileDrop}
+              onClick={() => fileInputRef.current?.click()}
+              style={{ marginTop: '1rem' }}
+            >
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                style={{ display: 'none' }} 
+                accept="application/pdf"
+                onChange={handleFileSelect}
+              />
+              {status === 'idle' ? (
+                <>
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '1rem', color: 'var(--accent-gold)' }}>
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Drag & Drop PDF</h3>
+                  <p style={{ color: 'var(--text-secondary)' }}>or click to browse</p>
+                </>
+              ) : (
+                <div style={{ width: '100%', maxWidth: '300px' }}>
+                  <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>
+                    {progress < 40 ? 'Extracting text...' : progress < 80 ? 'Identifying PO/Supplier...' : 'Parsing Line Items...'}
+                  </h3>
+                  <div style={{ width: '100%', height: '6px', background: 'var(--bg-secondary)', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{ width: `${progress}%`, height: '100%', background: 'var(--accent-gold)', transition: 'width 0.3s ease' }}></div>
+                  </div>
+                  <p style={{ color: 'var(--text-secondary)', marginTop: '1rem' }}>{fileName}</p>
+                </div>
+              )}
             </div>
-            <p style={{ color: 'var(--text-secondary)', marginTop: '1rem' }}>{fileName}</p>
           </div>
-        )}
+        </div>
+
+        <div style={{ flex: '2 1 500px' }}>
+          <div className="panel">
+            <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>Bank & GL CSV Matching</h2>
+            <form onSubmit={create}>
+              <fieldset disabled={busy}>
+                <div className="form-grid">
+                  {[
+                    ['entity_name','Entity name','text','Acme LLC'],
+                    ['currency','Currency','text','USD'],
+                    ['cash_account_ids','Cash account IDs','text','1000'],
+                    ['period_start','Period start','date','2025-01-01'],
+                    ['period_end','Period end','date','2025-12-31'],
+                    ['period_close_date','Close date (optional)','date','2026-01-15'],
+                    ['expected_opening_cash_cents','Opening cash (cents)','number','100000'],
+                    ['expected_closing_cash_cents','Closing cash (cents)','number',''],
+                    ['expected_bank_statement_ending_cents','Bank ending (cents)','number',''],
+                    ['license_key','License Key (Required)','password','test_stripe_key']
+                  ].map(([name,label,type,value]) => (
+                    <label key={name}>
+                      {label} 
+                      {name==='license_key'&&<small>(Purchase <a href="https://buy.stripe.com/test_bJe5kv1T8cKh1eD8km2oE06" target="_blank" rel="noreferrer">Solo</a> or <a href="https://buy.stripe.com/test_4gM7sDgO29y53mL6ce2oE07" target="_blank" rel="noreferrer">Firm</a> license)</small>}
+                      <input name={name} type={type} defaultValue={value} step={type==='number'?'1':undefined} required={!name.includes('expected_')&&name!=='period_close_date'}/>
+                    </label>
+                  ))}
+                  <label>
+                    Export dialect
+                    <select name="export_dialect" defaultValue="generic">
+                      <option value="generic">Generic</option>
+                      <option value="qbo">QBO CSV</option>
+                      <option value="xero">Xero CSV</option>
+                    </select>
+                  </label>
+                </div>
+                <div className="uploads" style={{ marginTop: '1.5rem', marginBottom: '1.5rem' }}>
+                  {['bank','gl'].map(kind=><label className="file" key={kind}>{kind==='bank'?'Bank CSV':'GL CSV'}<input type="file" accept=".csv" required onChange={e=>void file(kind,e.target.files?.[0])}/></label>)}
+                </div>
+                <button type="submit">Create job</button>
+              </fieldset>
+            </form>
+
+            {jobId && <p className="job" style={{ marginTop: '1rem' }}>Job {jobId} · ingested</p>}
+            <button className="secondary" disabled={!jobId||busy} onClick={run} style={{ marginTop: '1rem', width: '100%' }}>
+              {busy?'Working…':'Run AI Matching & Detectors'}
+            </button>
+            
+            {error && <pre role="alert" style={{ marginTop: '1rem' }}>{error}</pre>}
+            
+            {Object.entries(previews).map(([kind,rows]) => rows?.length > 0 && (
+              <div className="preview" key={kind} style={{ marginTop: '2rem' }}>
+                <h2>{kind.toUpperCase()} preview</h2>
+                <div className="scroll">
+                  <table>
+                    <thead>
+                      <tr>{rows[0].map((h,i)=><th key={i}>{h}</th>)}</tr>
+                    </thead>
+                    <tbody>
+                      {rows.slice(1).map((r,i)=><tr key={i}>{r.map((v,j)=><td key={j}>{v}</td>)}</tr>)}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
