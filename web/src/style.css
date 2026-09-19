@@ -671,6 +671,89 @@ aside h2 {
   margin-top: auto;
 }
 
+/* --- BORDERBOOKS COPILOT --- */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.metric-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+}
+
+.metric-card:hover {
+  border-color: var(--accent-gold);
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.metric-card.action-required {
+  border-color: var(--accent-gold);
+}
+
+.metric-card.alert {
+  border-color: var(--accent-red);
+}
+
+.metric-card small {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.metric-card strong {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.metric-card .trend {
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+.trend.positive { color: var(--accent-emerald); }
+.trend.negative { color: var(--accent-red); }
+
+.nlp-search {
+  display: flex;
+  align-items: center;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  margin: 2rem 0;
+  gap: 1rem;
+}
+
+.nlp-search svg {
+  color: var(--accent-gold);
+}
+
+.nlp-search input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
+
+.nlp-search input:focus {
+  box-shadow: none;
+}
+
 /* Media Queries */
 @media (max-width: 768px) {
   .hero h1 { font-size: 2.5rem; }
