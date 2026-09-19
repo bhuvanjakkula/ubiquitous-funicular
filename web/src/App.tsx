@@ -5,9 +5,10 @@ import CopilotDashboard from './screens/CopilotDashboard';
 import InvoiceExceptions from './screens/InvoiceExceptions';
 import SecurityAuditLog from './screens/SecurityAuditLog';
 import Upload from './screens/Upload';
+import Export from './screens/Export';
 import { DISCLAIMER } from './api';
 
-type View = 'landing' | 'dashboard' | 'exceptions' | 'security' | 'upload';
+type View = 'landing' | 'dashboard' | 'exceptions' | 'security' | 'upload' | 'export';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -52,6 +53,7 @@ export default function App() {
           <button className="text-button" onClick={() => setView('dashboard')} style={{ fontWeight: view === 'dashboard' ? 'bold' : 'normal' }}>Dashboard</button>
           <button className="text-button" onClick={() => setView('exceptions')} style={{ fontWeight: view === 'exceptions' ? 'bold' : 'normal' }}>Exceptions Queue</button>
           <button className="text-button" onClick={() => setView('upload')} style={{ fontWeight: view === 'upload' ? 'bold' : 'normal' }}>Import Hub</button>
+          <button className="text-button" onClick={() => setView('export')} style={{ fontWeight: view === 'export' ? 'bold' : 'normal' }}>Export & Finalize</button>
           <button className="text-button" onClick={() => setView('security')} style={{ fontWeight: view === 'security' ? 'bold' : 'normal', color: 'var(--accent-emerald)' }}>Audit Log</button>
           
           <div style={{ marginLeft: '1rem', paddingLeft: '1rem', borderLeft: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -73,6 +75,7 @@ export default function App() {
             onRun={() => setView('dashboard')} 
           />
         )}
+        {view === 'export' && <Export jobId={jobId} />}
       </main>
       <footer>LedgerTrace Copilot • Zero Cloud Data Retention • Human-In-The-Loop AI</footer>
     </>
