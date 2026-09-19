@@ -69,7 +69,7 @@ export default function Landing({ onStart }: { onStart: () => void }) {
               <li>PDF Evidence Generation</li>
               <li>Community Support</li>
             </ul>
-            <a href="https://buy.stripe.com/test_eVq8wH4eLbCJ2p39KncjS00" target="_blank" rel="noreferrer" style={{textDecoration: 'none'}}>
+            <a href="https://buy.stripe.com/test_aFadR16mT8qxd3HcWzcjS02" target="_blank" rel="noreferrer" style={{textDecoration: 'none'}}>
               <button className="secondary" style={{width: '100%'}}>Get Solo License</button>
             </a>
           </div>
