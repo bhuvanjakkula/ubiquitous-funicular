@@ -38,7 +38,7 @@ export default function App() {
         <main>
           <Landing onStart={() => setShowAuth(true)} />
         </main>
-        <footer>LedgerTrace • Intelligent Financial-Control Layer • Privacy First</footer>
+        <footer>LedgerTrace • Intelligent Financial-Control Layer • Privacy First • Queries & Support: <a href="mailto:bjtmusic12@gmail.com" style={{ color: 'inherit', textDecoration: 'underline' }}>bjtmusic12@gmail.com</a></footer>
       </>
     );
   }
@@ -77,7 +77,7 @@ export default function App() {
         )}
         {view === 'export' && <Export jobId={jobId} />}
       </main>
-      <footer>LedgerTrace Copilot • Zero Cloud Data Retention • Human-In-The-Loop AI</footer>
+      <footer>LedgerTrace Copilot • Zero Cloud Data Retention • Human-In-The-Loop AI • Queries & Support: <a href="mailto:bjtmusic12@gmail.com" style={{ color: 'inherit', textDecoration: 'underline' }}>bjtmusic12@gmail.com</a></footer>
     </>
   );
 }
