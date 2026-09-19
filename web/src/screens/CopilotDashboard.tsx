@@ -6,7 +6,7 @@ export default function CopilotDashboard({ onReviewExceptions }: { onReviewExcep
   return (
     <section>
       <p className="eyebrow">COMMAND CENTER</p>
-      <h1>BorderBooks AI Copilot</h1>
+      <h1>LedgerTrace AI Copilot</h1>
       <p className="sub">
         Intelligent financial-control layer. Real-time invoice-to-PO matching and anomaly detection.
       </p>

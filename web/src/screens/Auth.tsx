@@ -58,7 +58,7 @@ export default function Auth({ onLogin }: { onLogin: (role: UserRole) => void })
               </button>
             ))}
             <button type="button" className="gold-button" style={{ marginTop: '1.5rem' }} onClick={() => onLogin(role)}>
-              Enter BorderBooks
+              Enter LedgerTrace
             </button>
           </div>
         </div>
@@ -69,7 +69,7 @@ export default function Auth({ onLogin }: { onLogin: (role: UserRole) => void })
   return (
     <div className="auth-wrapper">
       <div className="auth-card">
-        <h1 className="auth-header">BorderBooks Auth</h1>
+        <h1 className="auth-header">LedgerTrace Auth</h1>
         <p className="auth-sub">Sign in to your intelligent financial-control layer.</p>
 
         <form className="auth-form" onSubmit={handleCredentialsSubmit}>

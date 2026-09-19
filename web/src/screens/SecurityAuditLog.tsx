@@ -14,9 +14,9 @@ type LogEvent = {
 };
 
 const MOCK_LOGS: LogEvent[] = [
-  { id: 'EV-1004', who: 'sarah.j@borderbooks.com', role: 'Finance Admin', what: 'Supplier Bank Account Change', when: '2026-09-19 14:32:10 UTC', deviceIp: 'MacBook Pro / 192.168.1.5', before: 'Acc: ****1122 (Chase)', after: 'Acc: ****9988 (BofA)', authz: 'MFA Verified', status: 'PENDING DUAL-APPROVAL' },
-  { id: 'EV-1005', who: 'sarah.j@borderbooks.com', role: 'Finance Admin', what: 'Payment Approval Attempt', when: '2026-09-19 14:35:05 UTC', deviceIp: 'MacBook Pro / 192.168.1.5', before: 'Status: Pending', after: 'Status: Approved', authz: 'MFA Verified', status: 'DENIED' },
-  { id: 'EV-1006', who: 'david.r@borderbooks.com', role: 'Approver', what: 'Payment Approved', when: '2026-09-19 14:40:12 UTC', deviceIp: 'Windows / 10.0.0.12', before: 'Status: Pending', after: 'Status: Approved', authz: 'Hardware Passkey', status: 'SUCCESS' },
+  { id: 'EV-1004', who: 'sarah.j@LedgerTrace.com', role: 'Finance Admin', what: 'Supplier Bank Account Change', when: '2026-09-19 14:32:10 UTC', deviceIp: 'MacBook Pro / 192.168.1.5', before: 'Acc: ****1122 (Chase)', after: 'Acc: ****9988 (BofA)', authz: 'MFA Verified', status: 'PENDING DUAL-APPROVAL' },
+  { id: 'EV-1005', who: 'sarah.j@LedgerTrace.com', role: 'Finance Admin', what: 'Payment Approval Attempt', when: '2026-09-19 14:35:05 UTC', deviceIp: 'MacBook Pro / 192.168.1.5', before: 'Status: Pending', after: 'Status: Approved', authz: 'MFA Verified', status: 'DENIED' },
+  { id: 'EV-1006', who: 'david.r@LedgerTrace.com', role: 'Approver', what: 'Payment Approved', when: '2026-09-19 14:40:12 UTC', deviceIp: 'Windows / 10.0.0.12', before: 'Status: Pending', after: 'Status: Approved', authz: 'Hardware Passkey', status: 'SUCCESS' },
   { id: 'EV-1007', who: 'System (Malware Scanner)', role: 'System', what: 'File Upload Scanned', when: '2026-09-19 15:01:22 UTC', deviceIp: 'Internal Network', before: 'Unscanned', after: 'Clean', authz: 'System Role', status: 'SUCCESS' },
   { id: 'EV-1008', who: 'unknown', role: 'None', what: 'API Authentication', when: '2026-09-19 15:15:40 UTC', deviceIp: '198.51.100.14', before: 'N/A', after: 'N/A', authz: 'Failed Token', status: 'FLAGGED' },
 ];

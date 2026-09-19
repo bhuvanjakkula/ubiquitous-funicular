@@ -671,7 +671,7 @@ aside h2 {
   margin-top: auto;
 }
 
-/* --- BORDERBOOKS COPILOT --- */
+/* --- LedgerTrace COPILOT --- */
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

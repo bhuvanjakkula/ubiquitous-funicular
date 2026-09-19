@@ -28,7 +28,7 @@ export default function App() {
     return (
       <>
         <header>
-          <div className="brand">▤ BorderBooks <small>AP COPILOT</small></div>
+          <div className="brand">▤ LedgerTrace <small>AP COPILOT</small></div>
           <nav>
             <button onClick={() => setShowAuth(true)}>Sign In / Register</button>
           </nav>
@@ -36,7 +36,7 @@ export default function App() {
         <main>
           <Landing onStart={() => setShowAuth(true)} />
         </main>
-        <footer>BorderBooks • Intelligent Financial-Control Layer • Privacy First</footer>
+        <footer>LedgerTrace • Intelligent Financial-Control Layer • Privacy First</footer>
       </>
     );
   }
@@ -45,7 +45,7 @@ export default function App() {
     <>
       <header>
         <div className="brand" style={{ cursor: 'pointer' }} onClick={() => setView('dashboard')}>
-          ▤ BorderBooks <small>AP COPILOT</small>
+          ▤ LedgerTrace <small>AP COPILOT</small>
         </div>
         <nav style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <button className="text-button" onClick={() => setView('dashboard')} style={{ fontWeight: view === 'dashboard' ? 'bold' : 'normal' }}>Dashboard</button>
@@ -73,7 +73,7 @@ export default function App() {
           />
         )}
       </main>
-      <footer>BorderBooks Copilot • Zero Cloud Data Retention • Human-In-The-Loop AI</footer>
+      <footer>LedgerTrace Copilot • Zero Cloud Data Retention • Human-In-The-Loop AI</footer>
     </>
   );
 }
