@@ -25,16 +25,17 @@ export default function CopilotDashboard({ onReviewExceptions }: { onReviewExcep
         <button className="secondary" style={{padding: '0.5rem 1rem'}}>Ask AI</button>
       </div>
 
+      <h2 style={{ fontSize: '1rem', color: 'var(--text-secondary)', marginBottom: '1rem', marginTop: '2rem' }}>Core AP Operations</h2>
       <div className="dashboard-grid">
+        <div className="metric-card" style={{ borderColor: 'var(--accent-emerald)', background: 'rgba(16, 185, 129, 0.05)' }}>
+          <small>STRAIGHT-THROUGH PROCESSING (STP)</small>
+          <strong>91.5%</strong>
+          <span className="trend positive">Safely processed without manual intervention</span>
+        </div>
         <div className="metric-card">
           <small>INVOICES PROCESSED</small>
           <strong>1,284</strong>
-          <span className="trend positive">↑ 12% vs last week</span>
-        </div>
-        <div className="metric-card">
-          <small>AUTOMATICALLY MATCHED</small>
-          <strong>1,176</strong>
-          <span className="trend positive">91.5% Match Rate</span>
+          <span className="trend positive">1,176 auto-matched</span>
         </div>
         <div className="metric-card action-required" onClick={onReviewExceptions}>
           <small>NEEDS REVIEW</small>
@@ -42,25 +43,53 @@ export default function CopilotDashboard({ onReviewExceptions }: { onReviewExcep
           <span className="trend negative">Action Required</span>
         </div>
         <div className="metric-card alert">
-          <small>SUSPECTED DUPLICATES</small>
-          <strong>21</strong>
-          <span className="trend negative">High Risk</span>
-        </div>
-        <div className="metric-card alert">
-          <small>UNUSUAL TRANSACTIONS</small>
-          <strong>14</strong>
-          <span className="trend negative">Anomaly Detected</span>
+          <small>HIGH RISK ANOMALIES</small>
+          <strong>35</strong>
+          <span className="trend negative">21 duplicates, 14 unusual</span>
         </div>
       </div>
 
       <div className="panel" style={{ marginTop: '3rem' }}>
-        <h2>System Intelligence Status</h2>
-        <ul style={{ marginTop: '1rem', lineHeight: '1.8' }}>
-          <li>✓ <strong>Document Intelligence:</strong> OCR engine active and learning.</li>
-          <li>✓ <strong>Semantic Matching:</strong> Invoice-to-PO exact & fuzzy matching enabled.</li>
-          <li>✓ <strong>Duplicate Detection:</strong> Cross-referencing amount, supplier, and dates.</li>
-          <li>✓ <strong>Continuous Learning:</strong> Human-in-the-loop corrections updating matching weights.</li>
-        </ul>
+        <h2>AI Value & Performance Metrics</h2>
+        <div className="dashboard-grid" style={{ marginTop: '1.5rem' }}>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Extraction Accuracy</span>
+              <span style={{ fontWeight: 'bold' }}>99.2%</span>
+            </div>
+            <div style={{ width: '100%', height: '4px', background: 'var(--bg-secondary)', borderRadius: '2px' }}><div style={{ width: '99.2%', height: '100%', background: 'var(--accent-emerald)', borderRadius: '2px' }}></div></div>
+          </div>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Match Precision / Recall</span>
+              <span style={{ fontWeight: 'bold' }}>98.5% / 96.0%</span>
+            </div>
+            <div style={{ width: '100%', height: '4px', background: 'var(--bg-secondary)', borderRadius: '2px' }}><div style={{ width: '98.5%', height: '100%', background: 'var(--accent-gold)', borderRadius: '2px' }}></div></div>
+          </div>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>False-Positive Anomaly Rate</span>
+              <span style={{ fontWeight: 'bold' }}>1.2%</span>
+            </div>
+            <div style={{ width: '100%', height: '4px', background: 'var(--bg-secondary)', borderRadius: '2px' }}><div style={{ width: '1.2%', height: '100%', background: 'var(--accent-red)', borderRadius: '2px' }}></div></div>
+          </div>
+        </div>
+        
+        <div className="dashboard-grid" style={{ marginTop: '2rem', borderTop: '1px solid var(--border-color)', paddingTop: '2rem' }}>
+          <div>
+            <small style={{ color: 'var(--text-secondary)', display: 'block', marginBottom: '0.25rem' }}>Avg Processing Time</small>
+            <strong style={{ fontSize: '1.5rem' }}>1.4s</strong>
+          </div>
+          <div>
+            <small style={{ color: 'var(--text-secondary)', display: 'block', marginBottom: '0.25rem' }}>Avg Exception-Resolution</small>
+            <strong style={{ fontSize: '1.5rem' }}>45s</strong>
+          </div>
+          <div>
+            <small style={{ color: 'var(--text-secondary)', display: 'block', marginBottom: '0.25rem' }}>Customer Corrections (30d)</small>
+            <strong style={{ fontSize: '1.5rem' }}>142</strong>
+            <span style={{ fontSize: '0.8rem', color: 'var(--accent-emerald)', display: 'block' }}>Improving models...</span>
+          </div>
+        </div>
       </div>
     </section>
   );
