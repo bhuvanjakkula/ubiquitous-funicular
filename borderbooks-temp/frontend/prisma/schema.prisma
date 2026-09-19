@@ -1,0 +1,214 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Plan {
+  STUDIO
+  COMMERCE
+}
+
+enum UploadKind {
+  INVOICES
+  PAYMENTS
+}
+
+enum TxnSource {
+  BANK
+  STRIPE
+  WISE
+  PAYONEER
+  GENERIC
+}
+
+enum MatchMethod {
+  EXACT_REF
+  FUZZY_REF
+  AMOUNT_DATE
+  MANUAL
+}
+
+enum LinkStatus {
+  PROPOSED
+  ACCEPTED
+  REJECTED
+}
+
+enum AuditAction {
+  UPLOAD
+  RUN
+  ACCEPT
+  REJECT
+  MANUAL
+  EXPORT
+}
+
+model User {
+  id          String       @id @default(cuid())
+  clerkId     String       @unique
+  email       String
+  createdAt   DateTime     @default(now())
+  memberships Membership[]
+  audit       AuditEvent[]
+}
+
+model Workspace {
+  id                   String         @id @default(cuid())
+  name                 String
+  plan                 Plan           @default(STUDIO)
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  accountLabels        Json?
+  createdAt            DateTime       @default(now())
+  memberships          Membership[]
+  files                FileUpload[]
+  invoices             Invoice[]
+  txns                 BankTxn[]
+  runs                 MatchRun[]
+  audit                AuditEvent[]
+  stripeSplits         StripeSplit[]
+}
+
+model Membership {
+  id          String    @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        String    @default("owner")
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@unique([workspaceId, userId])
+}
+
+model FileUpload {
+  id          String     @id @default(cuid())
+  workspaceId String
+  kind        UploadKind
+  filename    String
+  byteSize    Int
+  sha256      String
+  parseErrors Json
+  createdAt   DateTime   @default(now())
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id])
+}
+
+model Invoice {
+  id            String      @id @default(cuid())
+  workspaceId   String
+  uploadId      String?
+  externalId    String?
+  invoiceNumber String
+  customerName  String
+  currency      String
+  amountMinor   BigInt
+  issueDate     DateTime
+  dueDate       DateTime
+  reference     String?
+  status        String      @default("open")
+  rawJson       Json
+  fingerprint   String
+  workspace     Workspace   @relation(fields: [workspaceId], references: [id])
+  links         MatchLink[]
+
+  @@unique([workspaceId, fingerprint])
+}
+
+model BankTxn {
+  id           String      @id @default(cuid())
+  workspaceId  String
+  uploadId     String?
+  source       TxnSource
+  vendorId     String?
+  postedAt     DateTime
+  valueDate    DateTime?
+  currency     String
+  amountMinor  BigInt
+  description  String
+  counterparty String?
+  reference    String?
+  endToEndId   String?
+  rawJson      Json
+  fingerprint  String
+  workspace    Workspace   @relation(fields: [workspaceId], references: [id])
+  links        MatchLink[]
+
+  @@unique([workspaceId, fingerprint])
+}
+
+model MatchRun {
+  id              String      @id @default(cuid())
+  workspaceId     String
+  invoiceUploadId String
+  paymentUploadId String
+  settings        Json
+  createdAt       DateTime    @default(now())
+  workspace       Workspace   @relation(fields: [workspaceId], references: [id])
+  links           MatchLink[]
+}
+
+model MatchLink {
+  id            String      @id @default(cuid())
+  runId         String
+  invoiceId     String
+  txnId         String
+  confidence    Int
+  method        MatchMethod
+  flags         String[]
+  status        LinkStatus  @default(PROPOSED)
+  expectedMinor BigInt
+  receivedMinor BigInt
+  feeMinor      BigInt      @default(0)
+  fxDiffMinor   BigInt      @default(0)
+  fxRate        Decimal?
+  fxSource      String?
+  explanation   String
+  run           MatchRun   @relation(fields: [runId], references: [id])
+  invoice       Invoice    @relation(fields: [invoiceId], references: [id])
+  txn           BankTxn    @relation(fields: [txnId], references: [id])
+}
+
+model FxRate {
+  id         String   @id @default(cuid())
+  base       String
+  quote      String
+  date       String
+  rate       Decimal
+  source     String
+  fetchedAt  DateTime @default(now())
+
+  @@unique([base, quote, date], name: "base_quote_date")
+  @@index([base, quote])
+}
+
+model StripeSplit {
+  id                   String   @id @default(cuid())
+  workspaceId          String
+  payoutId             String
+  settlementCurrency   String
+  totalSaleMinor       BigInt
+  totalFeeMinor        BigInt
+  totalDepositMinor    BigInt
+  totalFxGainMinor     BigInt
+  totalFxLossMinor     BigInt
+  legsJson             Json
+  midRatesJson         Json
+  createdAt            DateTime @default(now())
+  workspace            Workspace @relation(fields: [workspaceId], references: [id])
+
+  @@unique([workspaceId, payoutId])
+}
+
+model AuditEvent {
+  id          String      @id @default(cuid())
+  workspaceId String
+  userId      String?
+  action      AuditAction
+  payload     Json
+  createdAt   DateTime    @default(now())
+  workspace   Workspace   @relation(fields: [workspaceId], references: [id])
+  user        User?       @relation(fields: [userId], references: [id])
+}

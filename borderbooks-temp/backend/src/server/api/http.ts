@@ -1,0 +1,6 @@
+import {ZodError} from "zod";
+import {ApiError} from "./context";
+export function serialize(value:unknown):unknown{if(typeof value==="bigint")return value.toString();if(value instanceof Date)return value.toISOString();if(Array.isArray(value))return value.map(serialize);if(value&&typeof value==="object")return Object.fromEntries(Object.entries(value).map(([key,item])=>[key,serialize(item)]));return value;}
+export const json=(value:unknown,status=200)=>Response.json(serialize(value),{status});
+export function failure(error:unknown){if(error instanceof ApiError)return json({error:error.message,code:error.code},error.status);if(error instanceof ZodError)return json({error:"Invalid request",code:"VALIDATION_ERROR",issues:error.issues},400);console.error(error);const envKeys=Object.keys(process.env).filter(k=>k.startsWith("STRIPE_")).map(k=>{const v=process.env[k];if(v===undefined)return `${k}(undef)`;if(v==="")return `${k}(empty)`;return `${k}(len:${v.length},val:${v.substring(0,5)}...)`;});return json({error:`Internal error: ${error instanceof Error?error.message:String(error)} | Vercel keys: ${envKeys.join(', ')}`,code:"INTERNAL_ERROR"},500);}
+export async function optionalJson(request:Request){const text=await request.text();if(!text)return{};try{return JSON.parse(text);}catch{throw new ApiError(400,"INVALID_JSON","Request body must be valid JSON");}}

@@ -1,0 +1,117 @@
+{
+  "settings": {
+    "dateWindowDaysBefore": 7,
+    "dateWindowDaysAfter": 14,
+    "feeToleranceBps": 30,
+    "feeFlatMajor": 25,
+    "feeCapMajor": 50,
+    "minAutoConfidence": 70,
+    "allowOneToMany": false,
+    "allowManyToOne": false
+  },
+  "links": [
+    {
+      "invoiceNumber": "INV-1001",
+      "txnId": "TXN-01",
+      "bucket": "matched",
+      "method": "EXACT_REF",
+      "flags": [],
+      "expectedMinor": "1000000",
+      "receivedMinor": "1000000",
+      "feeMinor": "0",
+      "fxDiffMinor": "0",
+      "minConfidence": 90
+    },
+    {
+      "invoiceNumber": "INV-1002",
+      "txnId": "TXN-02",
+      "bucket": "short_payment",
+      "method": "EXACT_REF",
+      "flags": ["SHORT", "FEE"],
+      "expectedMinor": "250000",
+      "receivedMinor": "248500",
+      "feeMinor": "1500",
+      "fxDiffMinor": "0",
+      "minConfidence": 55
+    },
+    {
+      "invoiceNumber": "INV-1003",
+      "txnId": "TXN-03",
+      "bucket": "short_payment",
+      "method": "EXACT_REF",
+      "flags": ["SHORT"],
+      "expectedMinor": "480000",
+      "receivedMinor": "475200",
+      "feeMinor": "4800",
+      "fxDiffMinor": "0",
+      "minConfidence": 18,
+      "note": "Path A strong ID SO-441; 48 USD > 25 cap so SHORT_OPEN still auto-linked"
+    },
+    {
+      "invoiceNumber": "INV-1004",
+      "txnId": "TXN-04",
+      "bucket": "matched",
+      "method": "FUZZY_REF",
+      "flags": [],
+      "expectedMinor": "90000",
+      "receivedMinor": "90000",
+      "feeMinor": "0",
+      "fxDiffMinor": "0",
+      "minConfidence": 50
+    },
+    {
+      "invoiceNumber": "INV-1006",
+      "txnId": "TXN-06",
+      "bucket": "matched",
+      "method": "FUZZY_REF",
+      "flags": [],
+      "expectedMinor": "330000",
+      "receivedMinor": "330000",
+      "feeMinor": "0",
+      "fxDiffMinor": "0",
+      "minConfidence": 50
+    },
+    {
+      "invoiceNumber": "INV-1008",
+      "txnId": "TXN-09",
+      "bucket": "matched",
+      "method": "EXACT_REF",
+      "flags": [],
+      "expectedMinor": "29900",
+      "receivedMinor": "29900",
+      "feeMinor": "0",
+      "fxDiffMinor": "0",
+      "minConfidence": 53
+    },
+    {
+      "invoiceNumber": "INV-1010",
+      "txnId": "TXN-10",
+      "bucket": "matched",
+      "method": "EXACT_REF",
+      "flags": ["OVER"],
+      "expectedMinor": "1200000",
+      "receivedMinor": "1228000",
+      "feeMinor": "0",
+      "fxDiffMinor": "0",
+      "minConfidence": 18,
+      "note": "Over 280 EUR is not WILD (5% = 600). INV-1011 stays unmatched. Not a batch link."
+    }
+  ],
+  "unmatchedInvoices": ["INV-1005", "INV-1007", "INV-1009", "INV-1011", "INV-1012"],
+  "unallocated_in": ["TXN-05", "TXN-07", "TXN-08", "TXN-12", "TXN-14", "TXN-15"],
+  "unallocated_out": ["TXN-11", "TXN-13"],
+  "suggestions": [
+    {
+      "type": "AMOUNT_DATE",
+      "invoiceNumber": "INV-1005",
+      "txnId": "TXN-05",
+      "reason": "INV-1001 already consumed by TXN-01; ACME WIRE equals remaining Acme EUR 10000; no invoice number"
+    },
+    {
+      "type": "AMOUNT_DATE",
+      "invoiceNumber": "INV-1007",
+      "txnId": "TXN-07",
+      "reason": "Exact amount unique USD 1500 and Norte token; no reference"
+    }
+  ]
+}

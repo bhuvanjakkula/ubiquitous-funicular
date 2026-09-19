@@ -1,0 +1,10 @@
+.next/
+node_modules/
+.playwright-browsers/
+test-results/
+playwright-report/
+.data/
+.env
+
+# clerk configuration (can include secrets)
+/.clerk/

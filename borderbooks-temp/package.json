@@ -1,0 +1,14 @@
+{
+  "name": "borderbooks-root",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "vercel-build": "cd frontend && npm run build"
+  },
+  "dependencies": {
+    "next": "latest"
+  }
+}

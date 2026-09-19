@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NULLMESH v0 - Consequential Divergence Time</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="glass-container">
+        <header>
+            <h1>NULLMESH <span class="version">v0</span></h1>
+            <p class="subtitle">Consequential Divergence Time (CDT) Engine</p>
+        </header>
+
+        <main>
+            <section class="controls panel">
+                <div class="control-group">
+                    <label for="scenario-select">Select Scenario</label>
+                    <div class="select-wrapper">
+                        <select id="scenario-select">
+                            <option value="killer_demo">Killer Demo (H12)</option>
+                            <option value="h20">Late Break (H20)</option>
+                            <option value="reserve_collision">Reserve Collision</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button id="run-btn" class="primary-btn">Run Engine</button>
+                    <button id="repair-btn" class="secondary-btn" disabled>Search Repair</button>
+                </div>
+            </section>
+
+            <div id="loading" class="hidden">
+                <div class="spinner"></div>
+                <p>Computing...</p>
+            </div>
+
+            <section id="results-area" class="results-area hidden">
+                <div class="summary-cards">
+                    <div class="card stat-card">
+                        <h3>Coherence Horizon</h3>
+                        <div class="stat-value" id="stat-horizon">--</div>
+                    </div>
+                    <div class="card stat-card">
+                        <h3>CDT (t*)</h3>
+                        <div class="stat-value" id="stat-tstar">--</div>
+                    </div>
+                    <div class="card stat-card">
+                        <h3>First Violated</h3>
+                        <div class="stat-value" id="stat-violated">--</div>
+                    </div>
+                </div>
+
+                <div class="card explanation-card">
+                    <h3>Engine Conclusion</h3>
+                    <p id="explanation-text">Run the engine to see the conclusion.</p>
+                </div>
+
+                <div id="repair-panel" class="card repair-card hidden">
+                    <div class="repair-header">
+                        <h3>Repair Plan Found</h3>
+                        <span class="badge" id="repair-cost">Cost: 0</span>
+                    </div>
+                    <p id="repair-desc" class="repair-desc"></p>
+                    <div class="repair-details">
+                        <p><strong>Restored Horizon:</strong> <span id="repair-horizon"></span></p>
+                        <ul id="repair-actions" class="action-list"></ul>
+                    </div>
+                </div>
+
+                <div class="card timeline-card">
+                    <h3>Tick Timeline</h3>
+                    <div class="timeline-container" id="timeline-container">
+                        <!-- Ticks will be injected here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
