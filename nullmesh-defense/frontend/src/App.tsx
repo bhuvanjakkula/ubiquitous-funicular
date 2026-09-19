@@ -1,12 +1,7 @@
-import React, { useState } from 'react';
-import { Activity, ShieldAlert, Cpu, HardDrive, Zap, Radio, Search, Code, CheckCircle, ArrowRight, Network, Share2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Activity, ShieldAlert, Radio, Search, CheckCircle, Network, Zap } from 'lucide-react';
 
-interface TickReport {
-  t: number;
-  world_count: number;
-  guaranteed: boolean;
-  violated: string[];
-}
+const IconMap: any = { Activity, ShieldAlert, Radio, Search, CheckCircle, Network, Zap };
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -18,8 +13,114 @@ function App() {
   const [isSignUp, setIsSignUp] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [testActive, setTestActive] = useState(false);
+  const [nodesDisrupted, setNodesDisrupted] = useState(false);
+  
+  // Live Telemetry states
+  const [nodeCount, setNodeCount] = useState(250034);
+  const [latency, setLatency] = useState(12);
+  const [packetLoss, setPacketLoss] = useState(0);
+  const [recoveryTime, setRecoveryTime] = useState("<50ms Sub-second Healing");
+  const [activeKey, setActiveKey] = useState("0x8F92A1...");
+  const defaultNodes = [
+    { id: 'cmd', label: 'Command', x: '12%', y: '50%', status: 'trusted', icon: 'ShieldAlert' },
+    { id: 'a', label: 'Node A', x: '30%', y: '50%', status: 'trusted', icon: 'Network' },
+    { id: 'b', label: 'Node B (Relay)', x: '55%', y: '25%', status: 'trusted', icon: 'Activity' },
+    { id: 'd', label: 'Node D (Backup)', x: '55%', y: '75%', status: 'standby', icon: 'Radio' },
+    { id: 'c', label: 'Node C', x: '78%', y: '50%', status: 'trusted', icon: 'Network' },
+    { id: 'recon', label: 'Recon Unit', x: '92%', y: '50%', status: 'trusted', icon: 'Search' },
+    { id: 'rogue', label: 'Unknown Emitter', x: '30%', y: '15%', status: 'unauthorized', icon: 'Zap' }
+  ];
 
-  const [scenario, setScenario] = useState("kill_web");
+  const defaultLinks = [
+    { id: 'cmd-a', source: 'cmd', target: 'a', status: 'active', latency: '8ms', bw: '10G' },
+    { id: 'a-b', source: 'a', target: 'b', status: 'active', latency: '12ms', bw: '10G' },
+    { id: 'b-c', source: 'b', target: 'c', status: 'active', latency: '9ms', bw: '10G' },
+    { id: 'a-d', source: 'a', target: 'd', status: 'standby', latency: '--', bw: '--' },
+    { id: 'd-c', source: 'd', target: 'c', status: 'standby', latency: '--', bw: '--' },
+    { id: 'c-recon', source: 'c', target: 'recon', status: 'active', latency: '14ms', bw: '10G' },
+    { id: 'rogue-a', source: 'rogue', target: 'a', status: 'blocked', latency: 'AUTH_FAIL', bw: '0G' }
+  ];
+
+  const [ws, setWs] = useState<WebSocket | null>(null);
+  const [topologyNodes, setTopologyNodes] = useState<any[]>(defaultNodes);
+  const [topologyLinks, setTopologyLinks] = useState<any[]>(defaultLinks);
+  const [wsConnected, setWsConnected] = useState(false);
+
+  // Idle key rotation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const chars = "0123456789ABCDEF";
+      let key = "0x";
+      for (let i = 0; i < 6; i++) key += chars[Math.floor(Math.random() * 16)];
+      key += "...";
+      setActiveKey(key);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // WebSocket Connection
+  useEffect(() => {
+    let socket: WebSocket | null = null;
+    let reconnectTimeout: any;
+
+    const connectWs = () => {
+      if (!isAuthenticated) return;
+      
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? '127.0.0.1:8001' 
+        : 'nullmesh-defense.onrender.com';
+      
+      socket = new WebSocket(`${wsProtocol}//${wsHost}/api/v1/mesh/stream`);
+      
+      socket.onopen = () => {
+        setWsConnected(true);
+      };
+
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === "MESH_STATE") {
+          setTopologyNodes(data.nodes);
+          setTopologyLinks(data.links);
+          setNodeCount(data.telemetry.nodeCount);
+          setLatency(data.telemetry.latency);
+          setPacketLoss(data.telemetry.packetLoss);
+          setRecoveryTime(data.telemetry.recoveryTime);
+          setNodesDisrupted(data.telemetry.nodesDisrupted);
+          setTestActive(data.telemetry.testActive);
+        }
+      };
+
+      socket.onclose = () => {
+        setWsConnected(false);
+        // Attempt to reconnect after 3 seconds
+        reconnectTimeout = setTimeout(connectWs, 3000);
+      };
+
+      setWs(socket);
+    };
+
+    connectWs();
+
+    return () => {
+      clearTimeout(reconnectTimeout);
+      if (socket) socket.close();
+    };
+  }, [isAuthenticated]);
+
+  const triggerResilienceTest = () => {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ command: 'KILL_NODE' }));
+    }
+  };
+
+  const [scenario, setScenario] = useState("soldiers");
+  useEffect(() => {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ command: 'SET_SCENARIO', scenario }));
+    }
+  }, [scenario, ws]);
   const [customPayload, setCustomPayload] = useState(
     JSON.stringify([
       { agent: "Alpha", schedule: { "0": ["standby"], "12": ["standby", "attack:alpha_target"], "13": ["standby"] } },
@@ -201,88 +302,14 @@ function App() {
           <div className="split-left">
             <section className="hero-section" style={{textAlign: 'left', padding: '0 0 2.5rem 0'}}>
               <h1 className="hero-title stylistic-title">
-                <span className="accent-word">Mathematical</span> Certainty<br/>
+                <span className="accent-word">Indestructible</span> Network<br/>
                 for Modern Warfare.
               </h1>
               <p className="hero-subtitle stylistic-subtitle">
-                <strong style={{color: 'var(--accent-cyan)'}}>NULLMESH v2</strong> is the world's first Consequential Divergence Time (CDT) Engine. We mathematically guarantee multi-domain operations, swarm resilience, and threat inference before the enemy even acts.
+                <strong style={{color: 'var(--accent-cyan)'}}>NullMesh</strong> is a resilient communications and networking layer designed to maintain trusted information exchange among distributed defense nodes when conventional communications infrastructure is unavailable, degraded, or disconnected.
               </p>
             </section>
 
-            <section className="features-section" style={{padding: '0'}}>
-              <div className="features-grid">
-                <div className="feature-card">
-                  <Radio className="feature-icon" size={24} />
-                  <div>
-                    <h3 className="feature-title">Temporal Kill Web</h3>
-                    <p className="feature-desc">JADC2 synchronization guaranteed across Space, Cyber, and Sea domains. Ensures sequential dependency across all joint operations.</p>
-                  </div>
-                </div>
-                <div className="feature-card">
-                  <Search className="feature-icon" size={24} />
-                  <div>
-                    <h3 className="feature-title">Inverse CDT Inference</h3>
-                    <p className="feature-desc">Reverse-engineer classified enemy operations from partial battlefield observations using advanced mathematical deduction.</p>
-                  </div>
-                </div>
-                <div className="feature-card">
-                  <Cpu className="feature-icon" size={24} />
-                  <div>
-                    <h3 className="feature-title">Swarm Topology Repair</h3>
-                    <p className="feature-desc">Decentralized resilience. Mathematically guarantee seamless leader re-election if an EMP severs drone swarm communications.</p>
-                  </div>
-                </div>
-                <div className="feature-card">
-                  <ShieldAlert className="feature-icon" size={24} />
-                  <div>
-                    <h3 className="feature-title">Deceptive EW Ghost Fleet</h3>
-                    <p className="feature-desc">Automated decoy generation. Schedule EW spoofing perfectly in-sync with evasive maneuvers to deceive hypersonic threats.</p>
-                  </div>
-                </div>
-                <div className="feature-card">
-                  <Zap className="feature-icon" size={24} />
-                  <div>
-                    <h3 className="feature-title">Quantum Entanglement Mesh</h3>
-                    <p className="feature-desc">Post-quantum cryptography simulation. Mathematically guarantee secure key distribution while automatically collapsing intercepted states.</p>
-                  </div>
-                </div>
-                <div className="feature-card">
-                  <Radio className="feature-icon" size={24} />
-                  <div>
-                    <h3 className="feature-title">Functional Redundancy</h3>
-                    <p className="feature-desc">Multi-path SATCOM and terrestrial backhaul resilience. Prevent single-point failure across critical communications links.</p>
-                  </div>
-                </div>
-                <div className="feature-card">
-                  <HardDrive className="feature-icon" size={24} />
-                  <div>
-                    <h3 className="feature-title">FPGA Hardware Hardening</h3>
-                    <p className="feature-desc">Zero-trust edge execution. Application-specific processor SoCs shrink the attack surface without relying on vulnerable cloud uplinks.</p>
-                  </div>
-                </div>
-                <div className="feature-card">
-                  <Activity className="feature-icon" size={24} />
-                  <div>
-                    <h3 className="feature-title">5G Microsegmentation</h3>
-                    <p className="feature-desc">Zero Trust Architecture. Continuous authentication and least-privilege access mathematically isolate network slices to mitigate DDoS and insider threats.</p>
-                  </div>
-                </div>
-                <div className="feature-card">
-                  <Network className="feature-icon" size={24} />
-                  <div>
-                    <h3 className="feature-title">Topology Optimization</h3>
-                    <p className="feature-desc">Partial-mesh structure validation. Mathematically prove cyber resilience under targeted node attacks, outperforming ring and tree topologies.</p>
-                  </div>
-                </div>
-                <div className="feature-card">
-                  <Share2 className="feature-icon" size={24} />
-                  <div>
-                    <h3 className="feature-title">Software-Defined Networks</h3>
-                    <p className="feature-desc">Decoupled control from data planes enables flexible, intelligent rerouting in military networks under severe disruption.</p>
-                  </div>
-                </div>
-              </div>
-            </section>
           </div>
 
           {/* Right Side: Auth Form */}
@@ -364,16 +391,39 @@ function App() {
               </div>
               
               <div className="app-container">
-                <header className="header">
-                  <div className="brand">
-                    <ShieldAlert size={28} className="logo-pulse" color="var(--accent-cyan)"/>
-                    <div style={{display: 'flex', flexDirection: 'column'}}>
-                      <h1>NULLMESH <span className="version">v2</span></h1>
-                      <div className="system-status">
-                        <div className="pulse"></div>
-                        CDT ENGINE ONLINE
+                <header className="header" style={{flexDirection: 'column', alignItems: 'stretch', gap: '1rem'}}>
+                  <div className="brand" style={{display: 'flex', justifyContent: 'space-between', width: '100%'}}>
+                    <div style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
+                      <ShieldAlert size={28} className="logo-pulse" color="var(--accent-cyan)"/>
+                      <div style={{display: 'flex', flexDirection: 'column'}}>
+                        <h1>NULLMESH <span className="version">v2</span></h1>
+                        <div className="system-status">
+                          <div className="pulse"></div>
+                          CDT ENGINE ONLINE
+                        </div>
                       </div>
                     </div>
+                    <div style={{display: 'flex', gap: '2rem', fontSize: '0.8rem', fontFamily: 'monospace', alignItems: 'center'}}>
+                      {!wsConnected && (
+                        <div style={{color: 'var(--accent-amber)', animation: 'pulse 1.5s infinite'}}>
+                          [WAITING FOR C2 UPLINK...]
+                        </div>
+                      )}
+                      <div><span style={{color: 'var(--text-muted)'}}>LATENCY:</span> <span style={{color: testActive && !nodesDisrupted ? 'var(--accent-red)' : 'var(--accent-green)'}}>&lt;{latency}ms</span></div>
+                      <div><span style={{color: 'var(--text-muted)'}}>THROUGHPUT:</span> <span style={{color: testActive && !nodesDisrupted ? 'var(--accent-amber)' : 'var(--accent-green)'}}>{testActive && !nodesDisrupted ? '4.2Gbps' : '10Gbps'}</span></div>
+                      <div><span style={{color: 'var(--text-muted)'}}>NODES:</span> <span style={{color: testActive && !nodesDisrupted ? 'var(--accent-red)' : 'var(--accent-cyan)'}}>{nodeCount.toLocaleString()}</span></div>
+                    </div>
+                  </div>
+                  
+                  <div className="telemetry-dashboard" style={{display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem', marginTop: '0.5rem', padding: '1rem', background: 'rgba(0,0,0,0.5)', border: '1px solid var(--border-color)', borderRadius: '4px'}}>
+                    <div className="tel-item"><span className="tel-label" style={{color: 'var(--text-muted)', fontSize: '0.65rem', display: 'block'}}>RECOVERY TIME</span><span className="tel-val" style={{fontSize: '0.85rem', color: testActive && !nodesDisrupted ? 'var(--accent-amber)' : 'white'}}>{recoveryTime}</span></div>
+                    <div className="tel-item"><span className="tel-label" style={{color: 'var(--text-muted)', fontSize: '0.65rem', display: 'block'}}>PACKET LOSS (DEGRADED)</span><span className="tel-val" style={{fontSize: '0.85rem', color: packetLoss > 0 ? 'var(--accent-red)' : 'white'}}>{packetLoss}% Data Loss (FEC+Multi)</span></div>
+                    <div className="tel-item"><span className="tel-label" style={{color: 'var(--text-muted)', fontSize: '0.65rem', display: 'block'}}>CRYPTO ARCHITECTURE</span><span className="tel-val" style={{fontSize: '0.85rem'}}>Post-Quantum Entangled</span></div>
+                    <div className="tel-item"><span className="tel-label" style={{color: 'var(--text-muted)', fontSize: '0.65rem', display: 'block'}}>DEVICE AUTH</span><span className="tel-val" style={{fontSize: '0.85rem', color: scenario === 'microsegmentation' ? 'var(--accent-cyan)' : 'white'}}>{scenario === 'microsegmentation' ? 'Active Biomimetic Scan...' : 'Zero-Trust Biomimetic'}</span></div>
+                    <div className="tel-item"><span className="tel-label" style={{color: 'var(--text-muted)', fontSize: '0.65rem', display: 'block'}}>KEY MANAGEMENT</span><span className="tel-val" style={{fontSize: '0.85rem', fontFamily: 'monospace', color: 'var(--accent-green)'}}>{activeKey} (Ephemeral)</span></div>
+                    <div className="tel-item"><span className="tel-label" style={{color: 'var(--text-muted)', fontSize: '0.65rem', display: 'block'}}>NODE COMPROMISE RESIST</span><span className="tel-val" style={{fontSize: '0.85rem'}}>Mathematical Isolation</span></div>
+                    <div className="tel-item"><span className="tel-label" style={{color: 'var(--text-muted)', fontSize: '0.65rem', display: 'block'}}>INTEROPERABILITY</span><span className="tel-val" style={{fontSize: '0.85rem'}}><span style={{color: scenario === 'microsegmentation' ? 'var(--accent-cyan)' : 'inherit'}}>5G</span>, JADC2, Link 16, SATCOM</span></div>
+                    <div className="tel-item"><span className="tel-label" style={{color: 'var(--text-muted)', fontSize: '0.65rem', display: 'block'}}>OFFLINE CAPABILITY</span><span className="tel-val" style={{fontSize: '0.85rem'}}>100% Autonomous Air-gap</span></div>
                   </div>
                 </header>
 
@@ -382,30 +432,25 @@ function App() {
                     <div className="input-group">
                       <label>TACTICAL SCENARIO</label>
                       <select value={scenario} onChange={(e) => { setScenario(e.target.value); setResults(null); setRepair(null); setInference(null); }}>
-                        <option value="killer">OPERATION KILLER (H12)</option>
-                        <option value="late">OPERATION ECHO (H20)</option>
-                        <option value="reserve">LOGISTICS COLLISION (H8)</option>
-                        <option value="uav_swarm">UAV SWARM DECONFLICTION (H15)</option>
-                        <option value="evacuation">EVACUATION LOGISTICS (H10)</option>
-                        <option value="mdo">MULTI-DOMAIN THREAT MATRIX (H14)</option>
-                        <option value="kill_web">DISTRIBUTED KILL WEB (H30)</option>
-                        <option value="swarm">AUTONOMOUS SWARM REPAIR (H10)</option>
-                        <option value="ew_ghost">DECEPTIVE EW GHOST FLEET (H10)</option>
-                        <option value="logistics">CONTESTED LOGISTICS RESILIENCE (H15)</option>
-                        <option value="a2ad">A2/AD THREAT IDENTIFICATION (H20)</option>
-                        <option value="qkd">POST-QUANTUM KEY DISTRIBUTION (H10)</option>
-                        <option value="redundancy">MULTI-PATH FUNCTIONAL REDUNDANCY (H15)</option>
-                        <option value="zero_trust">ZERO-TRUST EDGE EXECUTION (H12)</option>
-                        <option value="microsegmentation">5G MICROSEGMENTATION (H10)</option>
-                        <option value="topology">PARTIAL-MESH TOPOLOGY OPTIMIZATION (H15)</option>
-                        <option value="sdn">SOFTWARE-DEFINED NETWORK REROUTING (H12)</option>
-                        <option value="custom">CUSTOM PAYLOAD BUILDER</option>
+                        <option value="soldiers">SOLDIERS (Local/Team Comms)</option>
+                        <option value="border_posts">BORDER POSTS (Remote Networking)</option>
+                        <option value="disaster">DISASTER RESPONSE (Infrastructure Failed)</option>
+                        <option value="vehicles">VEHICLES (V2U Data Exchange)</option>
+                        <option value="uavs">UAV SWARM (Network Relay)</option>
+                        <option value="sensors">SENSORS (Distributed Transport)</option>
+                        <option value="command">COMMAND CENTERS (Distributed Intel)</option>
+                        <option value="naval">NAVAL OPERATIONS (Resilient Comms)</option>
+                        <option value="cyber">CYBER OPERATIONS (Segmented Nodes)</option>
                       </select>
                     </div>
                     <div className="input-group">
-                      <label>ENGINEER PROTOCOL</label>
-                      <select defaultValue="default">
-                        <option value="default">STRICT NULLMESH v2</option>
+                      <label>DEPLOYMENT PHASE</label>
+                      <select defaultValue="phase5" disabled style={{opacity: 0.8, border: '1px solid var(--accent-red)', color: 'var(--accent-red)', background: 'rgba(255, 0, 0, 0.05)'}}>
+                        <option value="phase1">PHASE 1 (Local Devices)</option>
+                        <option value="phase2">PHASE 2 (Peer Discovery)</option>
+                        <option value="phase3">PHASE 3 (Encrypted Nodes)</option>
+                        <option value="phase4">PHASE 4 (Hardware Links)</option>
+                        <option value="phase5">PHASE 5 (Field Test: Node Failure)</option>
                       </select>
                     </div>
                   </div>
@@ -436,7 +481,107 @@ function App() {
                         INFER ENEMY INTENT
                       </button>
                     )}
+                    <button className="btn-stripe btn-stripe-outline" onClick={triggerResilienceTest} disabled={testActive && !nodesDisrupted} style={{marginLeft: 'auto', borderColor: 'var(--accent-amber)', color: 'var(--accent-amber)'}}>
+                      {nodesDisrupted ? 'REROUTED' : (testActive ? 'DISRUPTING...' : 'STRESS TEST ARCHITECTURE')}
+                    </button>
                   </div>
+                </div>
+
+                <div className="panel mt-4" style={{border: '1px solid var(--border-color)', position: 'relative'}}>
+                  <h2 style={{fontSize: '0.85rem', color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '1.5rem'}}>LIVE NETWORK TOPOLOGY MAP</h2>
+                  <div className="architecture-diagram" style={{margin: '0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', height: '300px', background: '#050505', borderRadius: '8px', overflow: 'hidden'}}>
+                    {/* SVG Links */}
+                    <svg style={{position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1, pointerEvents: 'none'}}>
+                      {topologyLinks.map(link => {
+                        const source = topologyNodes.find(n => n.id === link.source);
+                        const target = topologyNodes.find(n => n.id === link.target);
+                        if (!source || !target) return null;
+                        
+                        let strokeColor = "var(--accent-green)";
+                        let strokeDash = "none";
+                        let strokeWidth = "2";
+                        let anim = "none";
+                        
+                        if (link.status === 'offline') { strokeColor = "var(--accent-red)"; strokeWidth = "1"; strokeDash = "5,5"; }
+                        else if (link.status === 'standby') { strokeColor = "#222"; }
+                        else if (link.status === 'blocked') { strokeColor = "var(--accent-amber)"; strokeDash = "2,4"; }
+                        else if (link.status === 'routing') { strokeColor = "var(--accent-cyan)"; strokeDash = "5,5"; anim = "march 0.5s linear infinite"; }
+                        else if (link.status === 'active' && link.id.includes('d')) { strokeColor = "var(--accent-cyan)"; strokeDash = "5,5"; anim = "march 1s linear infinite"; }
+                        
+                        return (
+                          <line key={link.id} x1={source.x} y1={source.y} x2={target.x} y2={target.y} stroke={strokeColor} strokeWidth={strokeWidth} strokeDasharray={strokeDash} style={{animation: anim}} />
+                        );
+                      })}
+                    </svg>
+
+                    {/* Link Metric Badges */}
+                    {topologyLinks.map(link => {
+                      const source = topologyNodes.find(n => n.id === link.source);
+                      const target = topologyNodes.find(n => n.id === link.target);
+                      if (!source || !target) return null;
+                      
+                      let badgeColor = "var(--accent-green)";
+                      if (link.status === 'offline') badgeColor = "var(--accent-red)";
+                      else if (link.status === 'standby') badgeColor = "#444";
+                      else if (link.status === 'blocked') badgeColor = "var(--accent-amber)";
+                      else if (link.status === 'routing' || (link.status === 'active' && link.id.includes('d'))) badgeColor = "var(--accent-cyan)";
+                      
+                      return (
+                        <div key={`badge-${link.id}`} style={{
+                          position: 'absolute',
+                          left: `calc((${source.x} + ${target.x}) / 2)`,
+                          top: `calc((${source.y} + ${target.y}) / 2)`,
+                          transform: 'translate(-50%, -50%)',
+                          zIndex: 2,
+                          background: 'rgba(0,0,0,0.8)',
+                          border: `1px solid ${badgeColor}`,
+                          color: badgeColor,
+                          fontSize: '0.55rem',
+                          padding: '2px 4px',
+                          borderRadius: '4px',
+                          fontFamily: 'monospace',
+                          textAlign: 'center',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {link.latency}<br/>{link.bw}
+                        </div>
+                      );
+                    })}
+
+                    {/* Nodes */}
+                    {topologyNodes.map(node => {
+                      const Icon = IconMap[node.icon];
+                      let borderColor = 'var(--accent-green)';
+                      let color = 'white';
+                      let opacity = 1;
+                      
+                      if (node.status === 'offline') {
+                        borderColor = 'var(--accent-red)';
+                        color = 'var(--accent-red)';
+                        opacity = 0.5;
+                      } else if (node.status === 'unauthorized') {
+                        borderColor = 'var(--accent-amber)';
+                        color = 'var(--accent-amber)';
+                      } else if (node.status === 'standby') {
+                        borderColor = '#333';
+                        color = '#666';
+                        opacity = 0.5;
+                      }
+                      
+                      return (
+                        <div key={node.id} className={`arch-node ${node.status}`} style={{position: 'absolute', left: node.x, top: node.y, transform: 'translate(-50%, -50%)', zIndex: 3, padding: '0.6rem', width: '80px', background: '#000', border: `1px solid ${borderColor}`, opacity, transition: 'all 0.3s'}}>
+                          <Icon size={16} color={borderColor} />
+                          <div style={{fontSize: '0.6rem', color: color, marginTop: '4px', textAlign: 'center'}}>{node.label}</div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  
+                  {nodesDisrupted && (
+                    <div style={{position: 'absolute', bottom: '10px', right: '10px', background: 'rgba(0, 255, 65, 0.1)', border: '1px solid var(--accent-green)', color: 'var(--accent-green)', padding: '4px 8px', fontSize: '0.65rem', fontFamily: 'monospace', borderRadius: '4px'}}>
+                      WARNING: PRIMARY LINKS SEVERED. DATA REROUTED VIA QUANTUM MESH BACKUP.
+                    </div>
+                  )}
                 </div>
 
                 {inference && (

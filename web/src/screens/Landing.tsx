@@ -69,7 +69,7 @@ export default function Landing({ onStart }: { onStart: () => void }) {
               <li>PDF Evidence Generation</li>
               <li>Community Support</li>
             </ul>
-            <a href="https://buy.stripe.com/test_aFadR16mT8qxd3HcWzcjS02" target="_blank" rel="noreferrer" style={{textDecoration: 'none'}}>
+            <a href="https://buy.stripe.com/test_00w28japEcKhaPd3022oE04" target="_blank" rel="noreferrer" style={{textDecoration: 'none'}}>
               <button className="secondary" style={{width: '100%'}}>Get Solo License</button>
             </a>
           </div>
@@ -84,7 +84,7 @@ export default function Landing({ onStart }: { onStart: () => void }) {
               <li>One-click QBO & Xero Exports</li>
               <li>Priority Email Support</li>
             </ul>
-            <a href="https://buy.stripe.com/test_cNiaEP7qXfSZ2p3f4HcjS03" target="_blank" rel="noreferrer" style={{textDecoration: 'none'}}>
+            <a href="https://buy.stripe.com/test_fZu00bgO211z3mLbwy2oE05" target="_blank" rel="noreferrer" style={{textDecoration: 'none'}}>
               <button style={{width: '100%'}}>Get Firm License</button>
             </a>
           </div>
