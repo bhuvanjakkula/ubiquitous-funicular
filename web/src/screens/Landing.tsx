@@ -69,7 +69,9 @@ export default function Landing({ onStart }: { onStart: () => void }) {
               <li>PDF Evidence Generation</li>
               <li>Community Support</li>
             </ul>
-            <button className="secondary" onClick={onStart}>Get Solo License</button>
+            <a href="https://buy.stripe.com/test_solo_placeholder" target="_blank" rel="noreferrer" style={{textDecoration: 'none'}}>
+              <button className="secondary" style={{width: '100%'}}>Get Solo License</button>
+            </a>
           </div>
           
           <div className="pricing-card premium">
@@ -82,7 +84,9 @@ export default function Landing({ onStart }: { onStart: () => void }) {
               <li>One-click QBO & Xero Exports</li>
               <li>Priority Email Support</li>
             </ul>
-            <button onClick={onStart}>Get Firm License</button>
+            <a href="https://buy.stripe.com/test_firm_placeholder" target="_blank" rel="noreferrer" style={{textDecoration: 'none'}}>
+              <button style={{width: '100%'}}>Get Firm License</button>
+            </a>
           </div>
         </div>
       </section>
