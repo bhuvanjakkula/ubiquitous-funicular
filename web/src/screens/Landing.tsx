@@ -54,6 +54,38 @@ export default function Landing({ onStart }: { onStart: () => void }) {
           </ul>
         </div>
       </section>
+      <section id="pricing" className="pricing-section">
+        <h2>Simple, Transparent Pricing</h2>
+        <p className="sub">Choose the plan that fits your accounting needs.</p>
+        
+        <div className="pricing-grid">
+          <div className="pricing-card">
+            <h3>Solo Edition</h3>
+            <p className="sub" style={{marginBottom: 0, fontSize: '0.9rem'}}>For independent bookkeepers</p>
+            <div className="pricing-price">$99<span>/mo</span></div>
+            <ul>
+              <li>Upload up to 5,000 transactions</li>
+              <li>Basic AI Matching Queue</li>
+              <li>PDF Evidence Generation</li>
+              <li>Community Support</li>
+            </ul>
+            <button className="secondary" onClick={onStart}>Get Solo License</button>
+          </div>
+          
+          <div className="pricing-card premium">
+            <h3 style={{color: 'var(--accent-gold)'}}>Firm Edition</h3>
+            <p className="sub" style={{marginBottom: 0, fontSize: '0.9rem'}}>For CPA firms & auditors</p>
+            <div className="pricing-price">$299<span>/mo</span></div>
+            <ul>
+              <li>Unlimited transaction volume</li>
+              <li>Advanced AI Matching & Explanations</li>
+              <li>One-click QBO & Xero Exports</li>
+              <li>Priority Email Support</li>
+            </ul>
+            <button onClick={onStart}>Get Firm License</button>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
