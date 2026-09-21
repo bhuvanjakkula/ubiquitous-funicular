@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: the-stock-operator
+    name: the-scientific-operator
     env: python
     buildCommand: |
       cd risk_pulse
