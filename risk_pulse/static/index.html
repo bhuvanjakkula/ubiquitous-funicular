@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Pulse Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-mesh"></div>
+    <div class="container">
+        <header>
+            <h1>Risk Pulse <span class="badge">Operator</span></h1>
+            <p>Never ask capital to obey an untested opinion.</p>
+        </header>
+
+        <main>
+            <div class="panel form-panel">
+                <h2>Trade Configuration</h2>
+                <form id="decide-form">
+                    <div class="form-group">
+                        <label for="equity">Account Equity ($)</label>
+                        <input type="number" id="equity" value="100000" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="entry">Entry Price</label>
+                            <input type="number" id="entry" step="0.01" value="50.0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="invalidation">Invalidation Price</label>
+                            <input type="number" id="invalidation" step="0.01" value="48.0" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="adv">Avg Daily Volume</label>
+                            <input type="number" id="adv" value="5000000" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="spread">Bid/Ask Spread</label>
+                            <input type="number" id="spread" step="0.01" value="0.01" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="stock_rs">Stock Rel. Strength</label>
+                            <input type="number" id="stock_rs" step="0.01" value="0.08" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="group_rs">Group Rel. Strength</label>
+                            <input type="number" id="group_rs" step="0.01" value="0.05" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regime">Market Regime</label>
+                        <select id="regime">
+                            <option value="advance" selected>Advance</option>
+                            <option value="decline">Decline</option>
+                            <option value="range">Range</option>
+                            <option value="unstable">Unstable</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn">Evaluate Trade</button>
+                </form>
+            </div>
+
+            <div class="panel results-panel">
+                <h2>Decision Engine Report</h2>
+                <div id="results" class="results-empty">
+                    <p>Submit the configuration to see sizing and alignment details.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
