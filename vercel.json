@@ -1,6 +1,6 @@
 {
   "name": "the-scientific-operator",
-  "buildCommand": "mkdir -p dist && (cp -r static/. dist/ || cp -r risk_pulse/static/. dist/)",
+  "buildCommand": "mkdir -p dist && cp -r static/. dist/",
   "outputDirectory": "dist",
   "rewrites": [
     {

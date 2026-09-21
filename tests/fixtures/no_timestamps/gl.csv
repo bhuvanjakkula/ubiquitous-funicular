@@ -1,7 +1,0 @@
-line_id,journal_id,txn_date,account_id,debit,credit,memo
-l1,j1,2025-01-15,1000,500.00,0,Customer deposit
-l2,j1,2025-01-15,4000,0,500.00,Customer deposit
-l3,j2,2025-01-16,6100,200.00,0,Office rent
-l4,j2,2025-01-16,1000,0,200.00,Office rent
-l5,j3,2025-01-17,6200,50.00,0,Bank fee
-l6,j3,2025-01-17,1000,0,50.00,Bank fee

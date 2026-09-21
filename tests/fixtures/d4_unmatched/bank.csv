@@ -1,5 +1,0 @@
-bank_line_id,posted_date,amount,description
-b1,2025-01-15,500.00,Customer deposit
-b2,2025-01-16,-200.00,Office rent
-b_fee,2025-01-20,-123.45,Mystery bank fee
-b3,2025-01-17,-50.00,Bank fee

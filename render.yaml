@@ -3,10 +3,8 @@ services:
     name: the-scientific-operator
     env: python
     buildCommand: |
-      cd risk_pulse
-      pip install fastapi uvicorn pydantic
+      pip install -r requirements.txt
     startCommand: |
-      cd risk_pulse
       uvicorn server:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION

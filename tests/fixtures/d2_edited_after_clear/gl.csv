@@ -1,7 +1,0 @@
-line_id,journal_id,txn_date,account_id,account_name,debit,credit,memo,created_at,modified_at,cleared_flag,cleared_date
-l1,j1,2025-01-15,1000,Checking,500.00,0,Customer deposit,2025-01-15,2025-01-15,true,2025-01-31
-l2,j1,2025-01-15,4000,Revenue,0,500.00,Customer deposit,2025-01-15,2025-01-15,,
-l3,j2,2025-01-16,6100,Rent,200.00,0,Office rent,2025-01-16,2025-06-02,,
-l4,j2,2025-01-16,1000,Checking,0,200.00,Office rent,2025-01-16,2025-06-02,true,2025-01-31
-l5,j3,2025-01-17,6200,Bank fees,50.00,0,Bank fee,2025-01-17,2025-01-17,,
-l6,j3,2025-01-17,1000,Checking,0,50.00,Bank fee,2025-01-17,2025-01-17,true,2025-01-31
