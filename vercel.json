@@ -1,7 +1,7 @@
 {
   "name": "the-stock-operator",
-  "buildCommand": "echo 'No build required for static HTML/CSS/JS'",
-  "outputDirectory": "risk_pulse/static",
+  "buildCommand": "mkdir -p dist && cp -r risk_pulse/static/* dist/",
+  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/api/(.*)",
