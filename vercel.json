@@ -1,11 +1,11 @@
 {
-  "buildCommand": "cd web 2>/dev/null || true; npm install && npm run build && (cp -r dist ../dist 2>/dev/null || true)",
-  "outputDirectory": "dist",
-  "installCommand": "echo 'Handled in buildCommand'",
+  "name": "the-stock-operator",
+  "buildCommand": "echo 'No build required for static HTML/CSS/JS'",
+  "outputDirectory": "risk_pulse/static",
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://ubiquitous-funicular-sfqh.onrender.com/api/$1"
+      "destination": "https://the-stock-operator.onrender.com/api/$1"
     }
   ]
 }
