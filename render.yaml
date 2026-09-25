@@ -2,12 +2,9 @@ services:
   - type: web
     name: the-scientific-operator
     env: python
-    buildCommand: |
-      cd web
-      pip install -r requirements.txt
-    startCommand: |
-      cd web
-      uvicorn server:app --host 0.0.0.0 --port $PORT
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn --app-dir web server:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
-        value: 3.12.0
+        value: 3.11.9
+
