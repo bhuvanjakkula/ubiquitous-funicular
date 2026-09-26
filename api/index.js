@@ -11,11 +11,17 @@ export default async function (req, res) {
     return res.end();
   }
 
+  // Restore original /v1/... route if rewritten by Vercel
+  const matchedPath = req.headers['x-matched-path'] || req.headers['x-forwarded-uri'] || req.headers['x-invoke-path'];
+  if (matchedPath && matchedPath.startsWith('/v1')) {
+    req.url = matchedPath;
+  }
+
   try {
     return await handler(req, res);
   } catch (err) {
-    res.statusCode = 500;
+    res.statusCode = err.status || 500;
     res.setHeader('Content-Type', 'application/json');
-    return res.end(JSON.stringify({ error: err.message || 'INTERNAL_ERROR' }));
+    return res.end(JSON.stringify({ error: err.message || 'INTERNAL_SERVER_ERROR' }));
   }
 }

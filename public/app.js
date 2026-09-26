@@ -1,4 +1,79 @@
 
+// Client-side state persistence for Serverless & Static environments
+function getStoredOrders() {
+  try {
+    const raw = sessionStorage.getItem('gox_orders_cache');
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return [
+    {
+      id: 'ORD-SPCX-BUY-01',
+      participantId: 'PART-APOLLO',
+      securityId: 'SPCX-N',
+      issuerId: 'ISS-SPACEX',
+      side: 'BUY',
+      quantity: 5000,
+      priceMinor: 11250,
+      status: 'OPEN',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'ORD-SPCX-SELL-01',
+      participantId: 'PART-SEQUOIA',
+      securityId: 'SPCX-N',
+      issuerId: 'ISS-SPACEX',
+      side: 'SELL',
+      quantity: 5000,
+      priceMinor: 11250,
+      status: 'OPEN',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'ORD-ANTH-BUY-02',
+      participantId: 'PART-HORIZON',
+      securityId: 'ANTH-C',
+      issuerId: 'ISS-ANTHROPIC',
+      side: 'BUY',
+      quantity: 2000,
+      priceMinor: 5000,
+      status: 'OPEN',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'ORD-ANTH-SELL-02',
+      participantId: 'PART-CITADEL',
+      securityId: 'ANTH-C',
+      issuerId: 'ISS-ANTHROPIC',
+      side: 'SELL',
+      quantity: 2000,
+      priceMinor: 5000,
+      status: 'OPEN',
+      createdAt: new Date().toISOString()
+    }
+  ];
+}
+
+function saveStoredOrders(orders) {
+  try {
+    sessionStorage.setItem('gox_orders_cache', JSON.stringify(orders));
+  } catch (e) {}
+}
+
+function getStoredTrades() {
+  try {
+    const raw = sessionStorage.getItem('gox_trades_cache');
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return [];
+}
+
+function saveStoredTrades(trades) {
+  try {
+    sessionStorage.setItem('gox_trades_cache', JSON.stringify(trades));
+  } catch (e) {}
+}
+
+
 function safeOn(id, event, handler) {
   const el = typeof id === 'string' ? document.getElementById(id) : id;
   if (el) {
@@ -727,9 +802,27 @@ safeOn('form-place-order', 'submit', async (e) => {
 // Component 7: Liquidity & Matching
 // -------------------------------------------------------------
 async function loadOrders() {
-  const res = await fetch(`${API_BASE}/v1/orders`);
-  const orders = await res.json();
+  let orders = [];
+  try {
+    const res = await fetch(`${API_BASE}/v1/orders`);
+    if (res.ok) {
+      orders = await res.json();
+    }
+  } catch (e) {}
+
+  // Merge with client-side cache
+  const cached = getStoredOrders();
+  if (!orders || orders.length === 0) {
+    orders = cached;
+  } else {
+    // Merge any user-added local orders not yet in server memory
+    const existingIds = new Set(orders.map(o => o.id));
+    for (const c of cached) {
+      if (!existingIds.has(c.id)) orders.unshift(c);
+    }
+  }
   state.orders = orders;
+  saveStoredOrders(orders);
 
   const countBadge = document.getElementById('matching-orders-count');
   if (countBadge) {
@@ -805,9 +898,26 @@ window.cancelAllOrders = async () => {
 };
 
 async function loadTrades() {
-  const res = await fetch(`${API_BASE}/v1/trades`);
-  const trades = await res.json();
+  let trades = [];
+  try {
+    const res = await fetch(`${API_BASE}/v1/trades`);
+    if (res.ok) {
+      trades = await res.json();
+    }
+  } catch (e) {}
+
+  const cached = getStoredTrades();
+  if (!trades || trades.length === 0) {
+    trades = cached;
+  } else {
+    const existingIds = new Set(trades.map(t => t.id || t.tradeId));
+    for (const c of cached) {
+      const cid = c.id || c.tradeId;
+      if (!existingIds.has(cid)) trades.unshift(c);
+    }
+  }
   state.trades = trades;
+  saveStoredTrades(trades);
 
   const countBadge = document.getElementById('matching-trades-count');
   if (countBadge) {
