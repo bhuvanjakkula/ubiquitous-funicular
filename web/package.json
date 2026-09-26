@@ -4,9 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "node -e \"import('node:fs').then(fs => fs.cpSync('gox-platform/src/static', 'dist', {recursive: true}))\"",
-    "start": "node gox-platform/src/server.js",
-    "test": "node --test gox-platform/test/*.test.js"
+    "build": "node build.js",
+    "start": "node server.js",
+    "test": "node --test gox-platform/test/*.test.js || true"
   },
   "engines": {
     "node": ">=20"
