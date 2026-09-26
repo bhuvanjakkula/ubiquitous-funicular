@@ -2076,6 +2076,11 @@ function initSecurityDesk() {
  * Layer 1 (Auth), Layer 2 (Pricing $299/$999), and Support Desk (bjtmusic12@gmail.com) Controller
  */
 function initAuthAndPricingLayer() {
+  const formSignIn = document.getElementById('form-auth-signin');
+  const formSignUp = document.getElementById('form-auth-signup');
+// layers initialized at top
+  const layerSupport = document.getElementById('layer-support');
+  const layerDashboard = document.getElementById('layer-dashboard');
   
   const STRIPE_PAYMENT_LINKS = {
     PRO_INDIVIDUAL: 'https://buy.stripe.com/test_3cIaEPfJY9y53mL3022oE0f',
@@ -2244,8 +2249,7 @@ function initAuthAndPricingLayer() {
   window.switchAuthTab = (tab) => {
     const btnTabSignIn = document.getElementById('btn-tab-signin');
     const btnTabSignUp = document.getElementById('btn-tab-signup');
-    const formSignIn = document.getElementById('form-auth-signin');
-    const formSignUp = document.getElementById('form-auth-signup');
+// forms initialized at top
 
     if (tab === 'signup') {
       if (btnTabSignUp) btnTabSignUp.classList.add('active');
