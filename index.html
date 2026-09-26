@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GOX — Global Ownership Exchange | Institutional Private Securities & DvP Settlement Platform</title>
+  <meta name="description" content="An integrated institutional architecture and trading platform for global private equity, programmable ownership, dynamic cap tables, and coordinated DvP settlement.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=20260926_7">
+</head>
+<body>
+  <!-- Ambient background glow effects -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+
+  <!-- Top Header Banner -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo-box">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+        </div>
+        <div>
+          <div class="logo-title">GOX <span class="badge-institutional">PROD-V2</span></div>
+          <div class="logo-subtitle">GLOBAL OWNERSHIP EXCHANGE</div>
+        </div>
+      </div>
+      <div class="consensus-badge">
+        <span class="pulsing-dot"></span>
+        <span>ATOMIC DVP ENGINE: ONLINE</span>
+      </div>
+    </div>
+
+    <!-- Live Market Ticker -->
+    <div class="market-ticker-wrap">
+      <div class="ticker-item"><span class="ticker-sym">SPCX-N</span> <span class="ticker-val" id="ticker-spcx">$112.50</span> <span class="ticker-up">▲ +2.4%</span></div>
+      <div class="ticker-divider">|</div>
+      <div class="ticker-item"><span class="ticker-sym">ANTH-C</span> <span class="ticker-val" id="ticker-anth">$49.75</span> <span class="ticker-up">▲ +4.1%</span></div>
+      <div class="ticker-divider">|</div>
+      <div class="ticker-item"><span class="ticker-sym">STRP-A</span> <span class="ticker-val" id="ticker-strp">$38.20</span> <span class="ticker-down">▼ -0.5%</span></div>
+      <div class="ticker-divider">|</div>
+      <div class="ticker-item"><span class="ticker-sym">REGULATION</span> <span class="ticker-reg">REG D / REG S 506(c)</span></div>
+    </div>
+
+    <!-- Header Actions -->
+    <div class="header-actions">
+      <!-- Quick Layer Nav Switchers -->
+      <button type="button" class="btn btn-xs btn-outline" id="btn-nav-layer1" onclick="showLayer1()" style="border-color: rgba(56, 189, 248, 0.4); color: var(--accent-cyan);">
+        🔐 1st Layer: Sign In / Sign Up
+      </button>
+      <button type="button" class="btn btn-xs btn-outline" id="btn-nav-layer2" onclick="showLayer2()" style="border-color: rgba(99, 102, 241, 0.4); color: #a5b4fc;">
+        💳 2nd Layer: Pricing Models ($299 / $999 / $9,000)
+      </button>
+      <!-- User Profile Badge & Membership -->
+      <div id="header-user-badge" class="header-user-badge" style="cursor: pointer;" title="Institutional Account">
+        <div class="user-avatar-circle" id="user-avatar-letter">M</div>
+        <div style="display: flex; flex-direction: column; text-align: left;">
+          <span id="user-display-email" style="font-weight: 600; font-size: 0.75rem;">Account Sign In</span>
+          <span id="user-display-plan" class="user-tier-pill pro">MEMBERSHIP</span>
+        </div>
+      </div>
+
+      <!-- Second Layer Web Page Trigger: Plans ($299 / $999 / $9,000) -->
+      <button class="btn btn-outline" id="btn-header-plans" title="View Membership Tiers & Pro Features ($299 / $999 / $9,000 USD/mo)">
+        <span class="btn-icon">⭐</span> Plans ($299 / $999 / $9,000)
+      </button>
+
+      <!-- Customer Support & Enquiry Desk Trigger: bjtmusic12@gmail.com -->
+      <button class="btn btn-outline" id="btn-header-support" title="Contact Customer Support at bjtmusic12@gmail.com">
+        <span class="btn-icon">🎧</span> Support & Enquiry
+      </button>
+
+      <!-- Sign Out / Switch User Trigger -->
+      <button class="btn btn-ghost" id="btn-header-signout" title="Sign Out / Switch Account">
+        <span class="btn-icon">🚪</span> Sign Out
+      </button>
+
+      <button class="btn btn-primary" id="btn-run-sim" title="Run 1-Click Institutional Trade Simulation">
+        <span class="btn-icon">⚡</span> Run Deal Simulator
+      </button>
+      <button class="btn btn-outline" id="btn-verify-audit" title="Cryptographically verify SHA-256 Merkle chain">
+        <span class="btn-icon">🔒</span> Verify Audit Chain
+      </button>
+      <button class="btn btn-ghost" id="btn-reset-data" title="Re-initialize seed data">
+        <span class="btn-icon">↺</span> Reset
+      </button>
+    </div>
+  </header>
+
+  <!-- Global Metrics Bar -->
+  <section class="metrics-banner">
+    <div class="metric-card">
+      <div class="metric-label">TOTAL SETTLED VOLUME</div>
+      <div class="metric-val" id="metric-settled-vol">$0.00</div>
+      <div class="metric-sub">Coordinated DvP Atomic Finality</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">ACTIVE PRIVATE ASSETS</div>
+      <div class="metric-val" id="metric-securities">3</div>
+      <div class="metric-sub">Series N, Series C, Class A</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">QUALIFIED PARTICIPANTS</div>
+      <div class="metric-val" id="metric-participants">6</div>
+      <div class="metric-sub" id="metric-verified-sub">5 KYC/KYB Verified</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">OPEN ORDER BOOK ORDERS</div>
+      <div class="metric-val" id="metric-orders">6</div>
+      <div class="metric-sub">Continuous Price-Time Matching</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">TAMPER-PROOF AUDIT LOGS</div>
+      <div class="metric-val" id="metric-audit-count">0</div>
+      <div class="metric-sub text-success" id="metric-chain-status">✓ SHA-256 Valid</div>
+    </div>
+  </section>
+
+  <!-- Main Application Body -->
+  <main class="main-container">
+    <!-- Navigation Tabs for the 8 Core Product Components -->
+    <nav class="nav-tabs" role="tablist">
+      <button class="tab-btn active" data-tab="tab-overview" id="nav-tab-overview">
+        <span class="tab-num">00</span> Overview
+      </button>
+      <button class="tab-btn" data-tab="tab-identity" id="nav-tab-identity">
+        <span class="tab-num">01</span> Identity & KYC
+      </button>
+      <button class="tab-btn" data-tab="tab-compliance" id="nav-tab-compliance">
+        <span class="tab-num">02</span> Compliance Engine
+      </button>
+      <button class="tab-btn" data-tab="tab-assets" id="nav-tab-assets">
+        <span class="tab-num">03</span> Asset Master & Proofs
+      </button>
+      <button class="tab-btn" data-tab="tab-programmable" id="nav-tab-programmable">
+        <span class="tab-num">04</span> Programmable Rules
+      </button>
+      <button class="tab-btn" data-tab="tab-captable" id="nav-tab-captable">
+        <span class="tab-num">05</span> Global Cap Table
+      </button>
+      <button class="tab-btn" data-tab="tab-orderbook" id="nav-tab-orderbook">
+        <span class="tab-num">06</span> Pricing & Depth
+      </button>
+      <button class="tab-btn" data-tab="tab-matching" id="nav-tab-matching">
+        <span class="tab-num">07</span> Liquidity Matching
+      </button>
+      <button class="tab-btn" data-tab="tab-settlement" id="nav-tab-settlement">
+        <span class="tab-num">08</span> DvP Settlement
+      </button>
+      <button class="tab-btn" data-tab="tab-audit" id="nav-tab-audit">
+        <span class="tab-num">09</span> Audit Stream
+      </button>
+      <button class="tab-btn" data-tab="tab-security" id="nav-tab-security">
+        <span class="tab-num">10</span> Security Desk
+      </button>
+    </nav>
+
+    <!-- TAB 0: EXECUTIVE OVERVIEW -->
+    <section class="tab-pane active" id="tab-overview">
+      <div class="overview-grid">
+        <!-- 8 Components Architecture Matrix -->
+        <div class="card card-hero">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Institutional Exchange Architecture</h2>
+              <p class="card-desc">Eight synchronized architectural pillars powering private secondary markets</p>
+            </div>
+            <span class="pill-active">ALL 8 SUBSYSTEMS LIVE</span>
+          </div>
+          <div class="components-matrix">
+            <div class="matrix-node" onclick="switchTab('tab-identity')">
+              <div class="node-badge">01</div>
+              <div class="node-title">Identity & KYC/KYB</div>
+              <div class="node-desc">Beneficial owners, PEP screening, accredited investor tiering</div>
+              <div class="node-status text-success">● Active</div>
+            </div>
+            <div class="matrix-node" onclick="switchTab('tab-compliance')">
+              <div class="node-badge">02</div>
+              <div class="node-title">Compliance Engine</div>
+              <div class="node-desc">Pre-trade regulatory policy checks (Reg D, Reg S, MiFID II)</div>
+              <div class="node-status text-success">● Active</div>
+            </div>
+            <div class="matrix-node" onclick="switchTab('tab-assets')">
+              <div class="node-badge">03</div>
+              <div class="node-title">Ownership Verification</div>
+              <div class="node-desc">Cryptographic holding proofs, ISIN registration, encumbrances</div>
+              <div class="node-status text-success">● Active</div>
+            </div>
+            <div class="matrix-node" onclick="switchTab('tab-programmable')">
+              <div class="node-badge">04</div>
+              <div class="node-title">Programmable Rules</div>
+              <div class="node-desc">Jurisdiction allowlists, lockup periods, investor cap limits</div>
+              <div class="node-status text-success">● Active</div>
+            </div>
+            <div class="matrix-node" onclick="switchTab('tab-captable')">
+              <div class="node-badge">05</div>
+              <div class="node-title">Global Cap Table</div>
+              <div class="node-desc">Multi-issuer equity ledger, share classes, atomic transfers</div>
+              <div class="node-status text-success">● Active</div>
+            </div>
+            <div class="matrix-node" onclick="switchTab('tab-orderbook')">
+              <div class="node-badge">06</div>
+              <div class="node-title">Price Discovery</div>
+              <div class="node-desc">L2 Order Book, reference pricing, bid/ask spread, VWAP</div>
+              <div class="node-status text-success">● Active</div>
+            </div>
+            <div class="matrix-node" onclick="switchTab('tab-matching')">
+              <div class="node-badge">07</div>
+              <div class="node-title">Liquidity & Matching</div>
+              <div class="node-desc">Continuous price-time crossing engine with surveillance</div>
+              <div class="node-status text-success">● Active</div>
+            </div>
+            <div class="matrix-node" onclick="switchTab('tab-settlement')">
+              <div class="node-badge">08</div>
+              <div class="node-title">Coordinated DvP</div>
+              <div class="node-desc">Atomic dual-leg cash escrow and equity registry settlement</div>
+              <div class="node-status text-success">● Active</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Featured Assets Spotlight -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Securities Master Spotlight</h3>
+            <button class="btn btn-xs btn-outline" onclick="switchTab('tab-assets')">View All</button>
+          </div>
+          <div class="spotlight-assets" id="overview-assets-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Live DvP Settlements Stream -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Recent DvP Settlements</h3>
+            <button class="btn btn-xs btn-outline" onclick="switchTab('tab-settlement')">Settlement Desk</button>
+          </div>
+          <div class="table-responsive">
+            <table class="table" id="overview-settlements-table">
+              <thead>
+                <tr>
+                  <th>Settlement ID</th>
+                  <th>Asset</th>
+                  <th>Notional</th>
+                  <th>Cash Leg</th>
+                  <th>Asset Leg</th>
+                  <th>Finality</th>
+                </tr>
+              </thead>
+              <tbody id="overview-settlements-tbody">
+                <tr><td colspan="6" class="text-center text-muted">No settlements yet. Run simulator to execute.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Live Audit Activity Feeder -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Cryptographic Event Stream</h3>
+            <button class="btn btn-xs btn-outline" onclick="switchTab('tab-audit')">Full Audit Ledger</button>
+          </div>
+          <div class="activity-feed" id="overview-audit-feed">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 1: IDENTITY & ACCREDITATION -->
+    <section class="tab-pane" id="tab-identity">
+      <div class="panel-layout">
+        <div class="card flex-2">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Institutional Participants Directory</h2>
+              <p class="card-desc">Verified market participants, institutional funds, and accredited investors</p>
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="toggleModal('modal-add-participant')">+ Register Participant</button>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Participant ID</th>
+                  <th>Legal Entity Name</th>
+                  <th>Type</th>
+                  <th>Jurisdiction</th>
+                  <th>Accreditation</th>
+                  <th>Risk Tier</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="table-participants-tbody">
+                <!-- Dynamically loaded -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card flex-1">
+          <div class="card-header">
+            <h3 class="card-title">Participant Verification Policy</h3>
+          </div>
+          <div class="info-callout">
+            <div class="callout-icon">🛡️</div>
+            <div class="callout-text">
+              <strong>GOX Compliance Invariant:</strong> No orders may enter the order book or match in liquidity without both parties having <code>VERIFIED</code> status under applicable jurisdictional KYC/KYB rules.
+            </div>
+          </div>
+          <div class="stats-list">
+            <div class="stats-item">
+              <span>Jurisdictions Represented:</span>
+              <span class="text-mono" id="id-jurisdictions-count">US, GB, SG, DE</span>
+            </div>
+            <div class="stats-item">
+              <span>Beneficial Owner Verification:</span>
+              <span class="text-success">25% UBO Compliant</span>
+            </div>
+            <div class="stats-item">
+              <span>Sanction Screening Provider:</span>
+              <span class="text-mono">GOX-Watchlist-v1.4</span>
+            </div>
+            <div class="stats-item">
+              <span>Accreditation Verification:</span>
+              <span class="text-mono">SEC Rule 501 / FINRA</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: COMPLIANCE ENGINE -->
+    <section class="tab-pane" id="tab-compliance">
+      <div class="panel-layout">
+        <!-- Interactive Compliance Test Bench -->
+        <div class="card flex-1">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Pre-Trade Compliance Evaluator</h2>
+              <p class="card-desc">Test real-time transfer eligibility against programmable rule packs</p>
+            </div>
+          </div>
+          <form id="form-compliance-eval">
+            <div class="form-group">
+              <label>Buyer Entity</label>
+              <select id="comp-buyer-select" class="form-control"></select>
+            </div>
+            <div class="form-group">
+              <label>Seller Entity</label>
+              <select id="comp-seller-select" class="form-control"></select>
+            </div>
+            <div class="form-group">
+              <label>Security / Asset</label>
+              <select id="comp-sec-select" class="form-control"></select>
+            </div>
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label>Trade Quantity</label>
+                <input type="number" id="comp-quantity" class="form-control" value="5000">
+              </div>
+              <div class="form-group flex-1">
+                <label>Rule Pack</label>
+                <select id="comp-rulepack" class="form-control">
+                  <option value="GLOBAL_INSTITUTIONAL">Global Institutional v2.1</option>
+                  <option value="US_REG_D">US Regulation D (506c)</option>
+                  <option value="US_REG_S">US Regulation S (Offshore)</option>
+                  <option value="EU_MIFID_II">EU MiFID II Eligible</option>
+                  <option value="GIFT_CITY">India GIFT City IFSCA</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Execute Pre-Trade Compliance Check</button>
+          </form>
+
+          <div id="compliance-result-box" class="result-box hidden">
+            <!-- Results populated here -->
+          </div>
+        </div>
+
+        <div class="card flex-1">
+          <div class="card-header">
+            <h3 class="card-title">Enforced Rule Matrix</h3>
+          </div>
+          <div class="rule-cards">
+            <div class="rule-card">
+              <div class="rule-card-header">
+                <span class="rule-tag tag-strict">MANDATORY</span>
+                <span class="rule-code">RULE-01: DUAL-KYC</span>
+              </div>
+              <div class="rule-body">Both buyer and seller must have valid cryptographic KYC/KYB attestations on file.</div>
+            </div>
+            <div class="rule-card">
+              <div class="rule-card-header">
+                <span class="rule-tag tag-strict">MANDATORY</span>
+                <span class="rule-code">RULE-02: SANCTIONS & AML</span>
+              </div>
+              <div class="rule-body">Immediate block on any participant with high AML risk score or originating from sanctioned jurisdictions.</div>
+            </div>
+            <div class="rule-card">
+              <div class="rule-card-header">
+                <span class="rule-tag tag-custom">PROGRAMMABLE</span>
+                <span class="rule-code">RULE-03: JURISDICTION FILTER</span>
+              </div>
+              <div class="rule-body">Asset-specific country allowlists and blocklists defined by the issuer's legal counsel.</div>
+            </div>
+            <div class="rule-card">
+              <div class="rule-card-header">
+                <span class="rule-tag tag-custom">PROGRAMMABLE</span>
+                <span class="rule-code">RULE-04: INVESTOR CAPS & LOCKUPS</span>
+              </div>
+              <div class="rule-body">Enforces lockup expiry dates and maximum share concentration thresholds per single investor.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: ASSET MASTER & VERIFICATION -->
+    <section class="tab-pane" id="tab-assets">
+      <div class="panel-layout">
+        <div class="card flex-2">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Securities Master Registry</h2>
+              <p class="card-desc">Tokenized and certified private corporate share classes</p>
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="toggleModal('modal-add-security')">+ Register Security</button>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Symbol</th>
+                  <th>Security Name</th>
+                  <th>Share Class</th>
+                  <th>Issuer ID</th>
+                  <th>Authorized Shares</th>
+                  <th>Par Value</th>
+                  <th>ISIN / Identifier</th>
+                </tr>
+              </thead>
+              <tbody id="table-securities-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card flex-1">
+          <div class="card-header">
+            <h3 class="card-title">Cryptographic Ownership Holdings</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-compact">
+              <thead>
+                <tr>
+                  <th>Owner</th>
+                  <th>Security</th>
+                  <th>Shares</th>
+                  <th>Proof</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="table-holdings-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: PROGRAMMABLE RULES -->
+    <section class="tab-pane" id="tab-programmable">
+      <div class="panel-layout">
+        <div class="card flex-2">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Asset Programmable Transfer Policies</h2>
+              <p class="card-desc">Configurable smart restrictions embedded into private share classes</p>
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="toggleModal('modal-add-policy')">+ Configure Policy</button>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Security</th>
+                  <th>Allowed Jurisdictions</th>
+                  <th>Blocked Jurisdictions</th>
+                  <th>Max / Investor</th>
+                  <th>Lockup Expiry</th>
+                  <th>Board Approval</th>
+                  <th>Accredited Only</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="table-policies-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card flex-1">
+          <div class="card-header">
+            <h3 class="card-title">Smart Transfer Restrictions</h3>
+          </div>
+          <div class="info-callout">
+            <div class="callout-icon">⚡</div>
+            <div class="callout-text">
+              Policies are executed pre-order, pre-match, and before DvP settlement. Even if a buy order matches in the order book, the settlement engine will prohibit cap-table mutations if programmable policy bounds are breached.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: GLOBAL CAP TABLE -->
+    <section class="tab-pane" id="tab-captable">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Institutional Multi-Issuer Cap Table</h2>
+            <p class="card-desc">Live shareholder ledger with atomic ownership reconciliation</p>
+          </div>
+          <div class="card-actions-row">
+            <select id="captable-issuer-filter" class="form-control form-control-sm">
+              <option value="ISS-SPACEX">Space Exploration Technologies Corp. (SpaceX)</option>
+              <option value="ISS-ANTHROPIC">Anthropic PBC</option>
+              <option value="ISS-STRIPE">Stripe Inc.</option>
+            </select>
+            <button class="btn btn-sm btn-primary" onclick="toggleModal('modal-manual-transfer')">Execute Transfer</button>
+          </div>
+        </div>
+
+        <!-- Cap Table Distribution Bar -->
+        <div class="captable-viz-container">
+          <div class="captable-viz-label">Ownership Distribution</div>
+          <div class="captable-bar" id="captable-bar"></div>
+          <div class="captable-legend" id="captable-legend"></div>
+        </div>
+
+        <div class="table-responsive mt-4">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Shareholder</th>
+                <th>Participant ID</th>
+                <th>Security Class</th>
+                <th>Quantity</th>
+                <th>Ownership %</th>
+                <th>Last Reconciled</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="table-captable-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 6: ORDER BOOK & PRICING -->
+    <section class="tab-pane" id="tab-orderbook">
+      <div class="pricing-top-strip">
+        <div class="security-selector-box">
+          <label>Selected Asset:</label>
+          <select id="pricing-security-select" class="form-control">
+            <option value="SPCX-N">SPCX-N — SpaceX Series N Preferred</option>
+            <option value="ANTH-C">ANTH-C — Anthropic Series C</option>
+            <option value="STRP-A">STRP-A — Stripe Class A</option>
+          </select>
+        </div>
+        <div class="pricing-stat-item">
+          <span class="stat-lbl">BEST BID:</span>
+          <span class="stat-num text-success" id="ref-best-bid">--</span>
+        </div>
+        <div class="pricing-stat-item">
+          <span class="stat-lbl">BEST ASK:</span>
+          <span class="stat-num text-danger" id="ref-best-ask">--</span>
+        </div>
+        <div class="pricing-stat-item">
+          <span class="stat-lbl">MID-MARKET:</span>
+          <span class="stat-num text-primary" id="ref-mid-price">--</span>
+        </div>
+        <div class="pricing-stat-item">
+          <span class="stat-lbl">SPREAD:</span>
+          <span class="stat-num text-warning" id="ref-spread">--</span>
+        </div>
+        <div class="pricing-stat-item">
+          <span class="stat-lbl">VWAP:</span>
+          <span class="stat-num" id="ref-vwap">--</span>
+        </div>
+      </div>
+
+      <div class="panel-layout">
+        <!-- Order Book Depth Ladder -->
+        <div class="card flex-2">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Level 2 Depth Ladder</h3>
+              <p class="card-desc">Visual aggregate depth across price tiers</p>
+            </div>
+            <button class="btn btn-xs btn-outline" id="btn-refresh-depth">↻ Refresh Depth</button>
+          </div>
+          <div class="depth-ladder-container">
+            <div class="depth-col">
+              <div class="depth-header text-success">BIDS (BUY ORDERS)</div>
+              <div class="depth-table-header">
+                <span>Total Qty</span>
+                <span>Cumulative</span>
+                <span>Bid Price</span>
+              </div>
+              <div id="depth-bids-list" class="depth-list"></div>
+            </div>
+            <div class="depth-col">
+              <div class="depth-header text-danger">ASKS (SELL ORDERS)</div>
+              <div class="depth-table-header">
+                <span>Ask Price</span>
+                <span>Cumulative</span>
+                <span>Total Qty</span>
+              </div>
+              <div id="depth-asks-list" class="depth-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Place Order Form -->
+        <div class="card flex-1">
+          <div class="card-header">
+            <h3 class="card-title">Place Institutional Order</h3>
+          </div>
+          <form id="form-place-order">
+            <div class="form-group">
+              <label>Participant</label>
+              <select id="order-participant-select" class="form-control" required></select>
+            </div>
+            <div class="side-selector">
+              <button type="button" class="btn-side btn-buy active" id="btn-side-buy">BUY</button>
+              <button type="button" class="btn-side btn-sell" id="btn-side-sell">SELL</button>
+            </div>
+            <div class="form-group">
+              <label>Price ($ per share)</label>
+              <input type="number" step="0.01" id="order-price" class="form-control" placeholder="112.50" required>
+            </div>
+            <div class="form-group">
+              <label>Quantity (Shares)</label>
+              <input type="number" id="order-quantity" class="form-control" placeholder="5000" required>
+            </div>
+            <div class="order-summary-box">
+              <div class="d-flex justify-between">
+                <span>Gross Trade Value:</span>
+                <span class="text-mono font-bold" id="order-est-total">$0.00</span>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block mt-3" id="btn-submit-order">Submit Order to Book</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 7: LIQUIDITY & MATCHING -->
+    <section class="tab-pane" id="tab-matching">
+      <div class="card mb-4">
+        <div class="card-header" style="flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h2 class="card-title">Liquidity Matching Engine</h2>
+            <p class="card-desc">Continuous price-time crossing with automated trade generation & dual-leg DvP settlement</p>
+          </div>
+          <div class="card-actions-row" style="flex-wrap: wrap; gap: 0.5rem; align-items: center;">
+            <!-- Asset Filter -->
+            <div style="display: flex; align-items: center; gap: 0.35rem;">
+              <label for="filter-matching-asset" style="font-size: 0.75rem; color: var(--text-muted); margin: 0; text-transform: uppercase;">Filter Asset:</label>
+              <select id="filter-matching-asset" class="form-control form-control-sm" style="width: 140px; padding: 0.25rem 0.5rem; font-size: 0.8rem; background: var(--bg-secondary);">
+                <option value="ALL">All Assets</option>
+              </select>
+            </div>
+
+            <!-- Run Matching Engine -->
+            <button class="btn btn-sm btn-primary" id="btn-trigger-match" title="Cross overlapping orders in the order book">
+              <span class="btn-icon">⚡</span> Run Matching Engine
+            </button>
+
+            <!-- Quick Crossing Trade Simulation -->
+            <button class="btn btn-sm btn-secondary" id="btn-quick-cross" title="Generate crossing buy & sell orders and immediately match them">
+              <span class="btn-icon">🎯</span> Quick Crossing Trade
+            </button>
+
+            <!-- Toggle Place Order Panel -->
+            <button class="btn btn-sm btn-outline" id="btn-toggle-order-drawer" title="Open or close order entry panel">
+              <span class="btn-icon">➕</span> Place Order
+            </button>
+
+            <!-- Cancel All Open Orders -->
+            <button class="btn btn-sm btn-ghost text-danger" id="btn-cancel-all-orders" title="Cancel all open and partially filled orders">
+              <span class="btn-icon">✕</span> Cancel All
+            </button>
+
+            <!-- Refresh Button -->
+            <button class="btn btn-sm btn-ghost" id="btn-refresh-matching" title="Refresh order book and trade executions">
+              <span class="btn-icon">↺</span> Refresh
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Order Entry Card (Collapsible) -->
+      <div class="card mb-4" id="matching-order-card" style="display: none; border: 1px solid var(--border-focus); background: rgba(12, 18, 32, 0.95);">
+        <div class="card-header" style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem;">
+          <div>
+            <h3 class="card-title text-primary" style="font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">
+              <span>➕ Direct Liquidity Order Entry</span>
+              <span class="badge badge-info" style="font-size: 0.7rem;">PRE-TRADE KYC GATED</span>
+            </h3>
+            <p class="card-desc" style="font-size: 0.8rem; margin: 0;">Submit an institutional limit order directly into the central limit order book</p>
+          </div>
+          <button type="button" class="btn btn-xs btn-ghost" id="btn-close-order-card" style="color: var(--text-muted);">✕ Close</button>
+        </div>
+        <form id="form-matching-order" style="padding: 1.25rem;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; align-items: end;">
+            <div class="form-group mb-0">
+              <label style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem; display: block;">Participant</label>
+              <select id="matching-participant-select" class="form-control form-control-sm" required></select>
+            </div>
+            <div class="form-group mb-0">
+              <label style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem; display: block;">Asset</label>
+              <select id="matching-security-select" class="form-control form-control-sm" required></select>
+            </div>
+            <div class="form-group mb-0">
+              <label style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem; display: block;">Order Side</label>
+              <div style="display: flex; gap: 0.5rem;">
+                <button type="button" class="btn btn-sm btn-success flex-1" id="btn-matching-side-buy" style="font-weight: 700; border-radius: var(--radius-sm);">BUY</button>
+                <button type="button" class="btn btn-sm btn-outline flex-1" id="btn-matching-side-sell" style="opacity: 0.6; border-radius: var(--radius-sm);">SELL</button>
+              </div>
+            </div>
+            <div class="form-group mb-0">
+              <label style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem; display: block;">Limit Price ($)</label>
+              <input type="number" step="0.01" min="0.01" id="matching-order-price" class="form-control form-control-sm font-mono" placeholder="113.00" value="113.00" required>
+            </div>
+            <div class="form-group mb-0">
+              <label style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem; display: block;">Quantity (Shares)</label>
+              <input type="number" step="1" min="1" id="matching-order-qty" class="form-control form-control-sm font-mono" placeholder="5000" value="5000" required>
+            </div>
+            <div class="form-group mb-0">
+              <button type="submit" class="btn btn-sm btn-primary btn-block" id="btn-matching-submit-order" style="height: 38px;">
+                <span>⚡ Place Order</span>
+              </button>
+            </div>
+          </div>
+          <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border-subtle); font-size: 0.8rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <span>Gross Notional: <strong id="matching-order-notional" class="font-mono text-main" style="font-size: 0.95rem; color: var(--accent-cyan);">$565,000.00</strong></span>
+            <span>Pre-Trade Gate: <span class="text-success font-bold">✓ KYC Verified & Cap-Table Backed</span></span>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel-layout">
+        <!-- Active Orders Table -->
+        <div class="card flex-1">
+          <div class="card-header" style="justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <h3 class="card-title">Active Order Book</h3>
+              <span class="badge badge-info" id="matching-orders-count">0 Orders</span>
+            </div>
+            <div style="display: flex; gap: 0.35rem;">
+              <button class="btn btn-xs btn-outline filter-order-status-btn active" id="btn-filter-orders-all" data-status="ALL">All</button>
+              <button class="btn btn-xs btn-outline filter-order-status-btn" id="btn-filter-orders-open" data-status="OPEN">Open</button>
+              <button class="btn btn-xs btn-outline filter-order-status-btn" id="btn-filter-orders-filled" data-status="FILLED">Filled</button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-compact">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Side</th>
+                  <th>Asset</th>
+                  <th>Qty</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="table-orders-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Matched Trades Table -->
+        <div class="card flex-1">
+          <div class="card-header" style="justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <h3 class="card-title">Matched Executions</h3>
+              <span class="badge badge-success" id="matching-trades-count">0 Trades</span>
+            </div>
+            <button class="btn btn-xs btn-ghost text-primary" onclick="switchTab('tab-settlement')">Go to DvP Pipeline ➔</button>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-compact">
+              <thead>
+                <tr>
+                  <th>Trade ID</th>
+                  <th>Asset</th>
+                  <th>Buyer</th>
+                  <th>Seller</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>DvP Action</th>
+                </tr>
+              </thead>
+              <tbody id="table-trades-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 8: DVP SETTLEMENT -->
+    <section class="tab-pane" id="tab-settlement">
+      <div class="card mb-4">
+        <div class="card-header" style="justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h2 class="card-title">Delivery versus Payment (DvP) Orchestrator</h2>
+            <p class="card-desc">Coordinated atomic dual-leg cash escrow and equity registry transfer</p>
+          </div>
+          <div class="card-actions-row" style="flex-wrap: wrap; gap: 0.5rem; align-items: center;">
+            <button class="btn btn-sm btn-primary" id="btn-settle-all-ready" title="Settle all deals where both cash and asset legs are confirmed">
+              <span class="btn-icon">⚡</span> Complete All Settlements
+            </button>
+            <button class="btn btn-sm btn-outline" id="btn-confirm-all-legs" title="Confirm escrow cash and asset locks for all pending settlements">
+              <span class="btn-icon">✓</span> Confirm All Legs
+            </button>
+            <button class="btn btn-sm btn-ghost" id="btn-refresh-settlements" title="Refresh settlements queue">
+              <span class="btn-icon">↺</span> Refresh
+            </button>
+          </div>
+        </div>
+        <div class="dvp-stepper-explainer">
+          <div class="dvp-step">
+            <div class="dvp-step-badge">1</div>
+            <div class="dvp-step-title">Trade Matched</div>
+            <div class="dvp-step-desc">Trade crossed in liquidity engine; settlement record initialized</div>
+          </div>
+          <div class="dvp-arrow">➔</div>
+          <div class="dvp-step">
+            <div class="dvp-step-badge">2</div>
+            <div class="dvp-step-title">Escrow Cash Leg</div>
+            <div class="dvp-step-desc">Buyer funds deposited in audited banking escrow account</div>
+          </div>
+          <div class="dvp-arrow">➔</div>
+          <div class="dvp-step">
+            <div class="dvp-step-badge">3</div>
+            <div class="dvp-step-title">Asset Freeze Leg</div>
+            <div class="dvp-step-desc">Seller equity shares frozen in transfer agent custody vault</div>
+          </div>
+          <div class="dvp-arrow">➔</div>
+          <div class="dvp-step">
+            <div class="dvp-step-badge">4</div>
+            <div class="dvp-step-title">Atomic Finality</div>
+            <div class="dvp-step-desc">Both legs confirmed; cap table updated; cryptographic receipt issued</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Coordinated Settlement Queue</h3>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Settlement ID</th>
+                <th>Trade Ref</th>
+                <th>Asset</th>
+                <th>Gross Notional</th>
+                <th>Cash Escrow Leg</th>
+                <th>Asset Registry Leg</th>
+                <th>DvP Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="table-settlements-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 9: AUDIT STREAM -->
+    <section class="tab-pane" id="tab-audit">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Cryptographic Tamper-Proof Audit Chain</h2>
+            <p class="card-desc">Immutable SHA-256 hash-chained event record of every mutation on GOX</p>
+          </div>
+          <div class="card-actions-row">
+            <button class="btn btn-sm btn-outline" id="btn-reverify-audit-chain">
+              <span class="btn-icon">🔒</span> Run Cryptographic Verification
+            </button>
+          </div>
+        </div>
+
+        <div id="audit-verification-banner" class="alert-banner alert-success mb-3">
+          <span class="alert-icon">✓</span>
+          <div id="audit-verification-text">Cryptographic Audit Chain Intact: All SHA-256 hashes successfully reconciled.</div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-compact font-mono">
+            <thead>
+              <tr>
+                <th>Seq</th>
+                <th>Timestamp</th>
+                <th>Actor</th>
+                <th>Action</th>
+                <th>Resource</th>
+                <th>Previous Hash</th>
+                <th>Current Block SHA-256 Hash</th>
+              </tr>
+            </thead>
+            <tbody id="table-audit-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 10: INSTITUTIONAL SECURITY & GOVERNANCE DESK -->
+    <section class="tab-pane" id="tab-security">
+      <div class="card mb-4">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Institutional Security, Cryptography & Governance Desk</h2>
+            <p class="card-desc">Zero-trust architecture with AES-256-GCM evidence encryption, HMAC signed callbacks, and replay defense</p>
+          </div>
+          <span class="pill-active">HARDENED SECURITY MATRIX: ENFORCED</span>
+        </div>
+        
+        <!-- Security Invariants Grid -->
+        <div class="components-matrix">
+          <div class="matrix-node">
+            <div class="node-badge">SEC-01</div>
+            <div class="node-title">AES-256-GCM Encryption</div>
+            <div class="node-desc">Participant KYC, tax IDs, and bank wires are encrypted at rest with 96-bit IVs and authentication tags.</div>
+            <div class="node-status text-success">● Active & Tamper-Guarded</div>
+          </div>
+          <div class="matrix-node">
+            <div class="node-badge">SEC-02</div>
+            <div class="node-title">HMAC Replay Protection</div>
+            <div class="node-desc">Webhook callbacks use SHA-256 signatures with single-use cryptographic nonces and 300s TTL windows.</div>
+            <div class="node-status text-success">● Anti-Replay Active</div>
+          </div>
+          <div class="matrix-node">
+            <div class="node-badge">SEC-03</div>
+            <div class="node-title">Least-Privilege RBAC</div>
+            <div class="node-desc">Cryptographically signed JWT bearer tokens enforce roles (INVESTOR, ISSUER, COMPLIANCE, ADMIN).</div>
+            <div class="node-status text-success">● Zero-Trust Gate</div>
+          </div>
+          <div class="matrix-node">
+            <div class="node-badge">SEC-04</div>
+            <div class="node-title">Rate Limiting Token Bucket</div>
+            <div class="node-desc">Sliding-window token bucket blocks high-frequency API abuse, spam orders, and credential brute force.</div>
+            <div class="node-status text-success">● Active: 60 req/min</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-layout">
+        <!-- Live AES-256-GCM Evidence Encryption Bench -->
+        <div class="card flex-1">
+          <div class="card-header">
+            <h3 class="card-title">🔒 AES-256-GCM Evidence Encryption Bench</h3>
+          </div>
+          <form id="form-security-encrypt">
+            <div class="form-group">
+              <label>Confidential Payload (e.g. KYC Tax ID / Escrow Wire Info)</label>
+              <textarea id="sec-encrypt-input" class="form-control" rows="3">{"taxId": "US-994-01-2026", "escrowWire": "CHASE-NY-889102", "ubo": "Dr. Jane Vance"}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Encrypt Payload (AES-256-GCM)</button>
+          </form>
+
+          <div id="sec-encrypt-result" class="result-box mt-3 hidden">
+            <div class="font-bold text-success mb-1">✓ ENCRYPTED CIPHERTEXT (WITH GCM AUTH TAG)</div>
+            <div class="font-mono text-xs text-dim" style="word-break: break-all;" id="sec-cipher-display"></div>
+            <button class="btn btn-xs btn-outline mt-2" id="btn-test-decrypt">Test Decrypt</button>
+            <button class="btn btn-xs btn-ghost text-danger mt-2" id="btn-test-tamper">Simulate Tampering Attack</button>
+          </div>
+        </div>
+
+        <!-- Live HMAC Signed Callback & Replay Attack Defense -->
+        <div class="card flex-1">
+          <div class="card-header">
+            <h3 class="card-title">🛡️ HMAC Signed Callbacks & Replay Defense</h3>
+          </div>
+          <form id="form-security-sign">
+            <div class="form-group">
+              <label>Settlement Callback Payload</label>
+              <input type="text" id="sec-sign-payload" class="form-control" value='{"event": "ESCROW_CASH_CONFIRMED", "settlementId": "DVP-SPCX-001"}'>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Sign Payload (HMAC-SHA256)</button>
+          </form>
+
+          <div id="sec-sign-result" class="result-box mt-3 hidden">
+            <div class="font-bold text-primary mb-1">HMAC SIGNATURE HEADER</div>
+            <div class="font-mono text-xs text-dim" style="word-break: break-all;" id="sec-sig-display"></div>
+            <div class="d-flex gap-2 mt-2">
+              <button class="btn btn-xs btn-outline" id="btn-verify-sig">Verify Signature (Legitimate)</button>
+              <button class="btn btn-xs btn-ghost text-danger" id="btn-replay-sig">Replay Same Nonce (Replay Attack)</button>
+            </div>
+            <div id="sec-replay-status" class="mt-2 text-xs font-mono"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: ADD PARTICIPANT -->
+  <div class="modal-overlay hidden" id="modal-add-participant">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Register New Market Participant</h3>
+        <button class="modal-close" onclick="toggleModal('modal-add-participant')">✕</button>
+      </div>
+      <form id="form-register-participant">
+        <div class="form-group">
+          <label>Legal Entity Name</label>
+          <input type="text" id="part-name" class="form-control" placeholder="e.g. Goldman Sachs Private Equity SPV" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label>Entity Type</label>
+            <select id="part-type" class="form-control">
+              <option value="INSTITUTION">INSTITUTION</option>
+              <option value="INDIVIDUAL">INDIVIDUAL</option>
+            </select>
+          </div>
+          <div class="form-group flex-1">
+            <label>Country Code (ISO-2)</label>
+            <input type="text" id="part-country" class="form-control" placeholder="US" maxlength="2" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label>Accreditation Tier</label>
+            <select id="part-accreditation" class="form-control">
+              <option value="QUALIFIED_PURCHASER">QUALIFIED_PURCHASER ($5M+ Investable)</option>
+              <option value="ACCREDITED">ACCREDITED INVESTOR</option>
+              <option value="RETAIL">RETAIL</option>
+            </select>
+          </div>
+          <div class="form-group flex-1">
+            <label>Initial Risk Assessment</label>
+            <select id="part-risk" class="form-control">
+              <option value="LOW">LOW</option>
+              <option value="MEDIUM">MEDIUM</option>
+              <option value="HIGH">HIGH (AML Flag)</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="toggleModal('modal-add-participant')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Register Participant</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTER SECURITY -->
+  <div class="modal-overlay hidden" id="modal-add-security">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Register New Security Class</h3>
+        <button class="modal-close" onclick="toggleModal('modal-add-security')">✕</button>
+      </div>
+      <form id="form-register-security">
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label>Symbol / Ticker</label>
+            <input type="text" id="sec-symbol" class="form-control" placeholder="e.g. OAI-E" required>
+          </div>
+          <div class="form-group flex-2">
+            <label>Security Name</label>
+            <input type="text" id="sec-name" class="form-control" placeholder="e.g. OpenAI Series E Preferred" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label>Issuer ID</label>
+            <input type="text" id="sec-issuer" class="form-control" placeholder="ISS-OPENAI" required>
+          </div>
+          <div class="form-group flex-1">
+            <label>Share Class</label>
+            <input type="text" id="sec-class" class="form-control" placeholder="Series E Preferred" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label>Authorized Shares</label>
+            <input type="number" id="sec-auth-shares" class="form-control" value="20000000" required>
+          </div>
+          <div class="form-group flex-1">
+            <label>Par Value ($)</label>
+            <input type="number" step="0.01" id="sec-par" class="form-control" value="1.00" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="toggleModal('modal-add-security')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Register Security</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIGURE POLICY -->
+  <div class="modal-overlay hidden" id="modal-add-policy">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Configure Programmable Ownership Policy</h3>
+        <button class="modal-close" onclick="toggleModal('modal-add-policy')">✕</button>
+      </div>
+      <form id="form-configure-policy">
+        <div class="form-group">
+          <label>Target Security</label>
+          <select id="policy-sec-select" class="form-control" required></select>
+        </div>
+        <div class="form-group">
+          <label>Allowed Countries (Comma-separated ISO codes)</label>
+          <input type="text" id="policy-allowed-countries" class="form-control" placeholder="US, GB, SG, DE, CH, IN">
+        </div>
+        <div class="form-group">
+          <label>Blocked Countries (Sanctions / Prohibitions)</label>
+          <input type="text" id="policy-blocked-countries" class="form-control" placeholder="KP, IR, RU, CU">
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label>Max Quantity / Investor</label>
+            <input type="number" id="policy-max-investor" class="form-control" placeholder="500000">
+          </div>
+          <div class="form-group flex-1">
+            <label>Lockup Expiry Date</label>
+            <input type="date" id="policy-lockup-date" class="form-control">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1 checkbox-wrap">
+            <input type="checkbox" id="policy-board-approval">
+            <label for="policy-board-approval">Requires Board Approval</label>
+          </div>
+          <div class="form-group flex-1 checkbox-wrap">
+            <input type="checkbox" id="policy-accredited-only" checked>
+            <label for="policy-accredited-only">Accredited Investors Only</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="toggleModal('modal-add-policy')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Policy</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: MANUAL CAP TABLE TRANSFER -->
+  <div class="modal-overlay hidden" id="modal-manual-transfer">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Execute Cap Table Secondary Transfer</h3>
+        <button class="modal-close" onclick="toggleModal('modal-manual-transfer')">✕</button>
+      </div>
+      <form id="form-manual-transfer">
+        <div class="form-group">
+          <label>Company / Issuer</label>
+          <select id="transfer-issuer-select" class="form-control" required></select>
+        </div>
+        <div class="form-group">
+          <label>From Shareholder</label>
+          <select id="transfer-from-select" class="form-control" required></select>
+        </div>
+        <div class="form-group">
+          <label>To Shareholder</label>
+          <select id="transfer-to-select" class="form-control" required></select>
+        </div>
+        <div class="form-group">
+          <label>Share Quantity</label>
+          <input type="number" id="transfer-quantity" class="form-control" placeholder="10000" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="toggleModal('modal-manual-transfer')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Execute Atomic Transfer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: SETTLEMENT RECEIPT DETAILS -->
+  <div class="modal-overlay hidden" id="modal-receipt">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>DvP Settlement Finality Receipt</h3>
+        <button class="modal-close" onclick="toggleModal('modal-receipt')">✕</button>
+      </div>
+      <div id="receipt-details-body" class="receipt-body font-mono"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="toggleModal('modal-receipt')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       LAYER 1: SIGN IN & SIGN UP GATEWAY LAYER (FIRST PAGE LAYER)
+       ==================================================================== -->
+  <div class="gateway-layer" id="layer-auth" style="display: flex;">
+    <div class="gateway-container">
+      <div class="gateway-header">
+        <div class="gateway-title-box">
+          <div class="logo-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+              <polyline points="2 17 12 22 22 17"></polyline>
+              <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+          </div>
+          <div>
+            <h2 style="font-size: 1.2rem; font-weight: 800; margin: 0; color: #fff;">First Web Page Layer — Sign In & Sign Up Gateway</h2>
+            <p style="font-size: 0.8rem; color: var(--accent-cyan); margin: 0;">Global Ownership Exchange &bull; Support: bjtmusic12@gmail.com</p>
+          </div>
+        </div>
+        <div style="font-size: 0.78rem; color: var(--accent-cyan); font-weight: 700; display: flex; align-items: center; gap: 0.35rem; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); padding: 0.3rem 0.75rem; border-radius: var(--radius-full);">🔒 SECURED GATEWAY</div>
+      </div>
+
+      <div class="gateway-body">
+        <div class="auth-grid">
+          <!-- Left Hero Assurance Pane -->
+          <div class="auth-hero-pane">
+            <div>
+              <span class="badge-institutional">STAGE 1: IDENTITY ACCESS</span>
+              <h3 style="font-size: 1.35rem; font-weight: 700; margin-top: 0.75rem; color: var(--text-main);">Compliant Secondary Private Markets</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; line-height: 1.5;">
+                Access institutional liquidity pools, dynamic global cap tables, and cryptographically verified Delivery-versus-Payment clearing.
+              </p>
+
+              <div style="margin-bottom: 1rem;">
+                <button type="button" class="btn btn-sm btn-outline" onclick="showLayer2()" style="width: 100%; border-color: rgba(99, 102, 241, 0.5); color: #c7d2fe; background: rgba(99, 102, 241, 0.1);">
+                  💳 View Second Layer: Pricing Models ($299 / $999 / $9,000) ➔
+                </button>
+              </div>
+              <ul class="auth-features-list">
+                <li class="auth-feature-item">
+                  <span class="auth-feature-icon">🛡️</span>
+                  <span>AES-256-GCM Hardware Encrypted Security & Merkle Proofs</span>
+                </li>
+                <li class="auth-feature-item">
+                  <span class="auth-feature-icon">⚡</span>
+                  <span>Sub-millisecond Price-Time Continuous Crossing Engine</span>
+                </li>
+                <li class="auth-feature-item">
+                  <span class="auth-feature-icon">🔒</span>
+                  <span>Dual-Leg Banking Escrow & Cap Table Synchronization</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="auth-support-pill" style="margin-top: 1.5rem; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: var(--radius-md); padding: 0.85rem 1rem;">
+              <div style="font-size: 0.85rem; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.4rem;">
+                <span>💬</span> Support and Enquiry
+              </div>
+              <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.35rem;">
+                Contact: <a href="mailto:bjtmusic12@gmail.com" style="color: #fff; font-weight: 600; text-decoration: underline;">bjtmusic12@gmail.com</a>
+              </div>
+              <button type="button" class="btn btn-xs btn-outline mt-2" onclick="toggleModal('modal-support-enquiry')" style="width: 100%; border-color: rgba(56, 189, 248, 0.4); color: var(--accent-cyan);">
+                ✉️ Open Support & Enquiry Form
+              </button>
+            </div>
+          </div>
+
+          <!-- Right Auth Forms Box -->
+          <div>
+            <!-- Tabs: Sign In / Sign Up -->
+            <div class="auth-tabs-nav">
+              <button type="button" class="auth-tab-btn active" id="btn-tab-signin" onclick="switchAuthTab('signin')">Sign In</button>
+              <button type="button" class="auth-tab-btn" id="btn-tab-signup" onclick="switchAuthTab('signup')">Create Account (Sign Up)</button>
+            </div>
+
+            <!-- Form 1: Sign In -->
+            <form id="form-auth-signin">
+              <div class="form-group">
+                <label>Email ID</label>
+                <input type="email" id="signin-email" class="form-control" placeholder="name@firm.com" required>
+              </div>
+              <div class="form-group">
+                <label>Mobile Number</label>
+                <input type="tel" id="signin-mobile" class="form-control" placeholder="+1 (555) 000-0000">
+              </div>
+              <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="signin-password" class="form-control" placeholder="••••••••••••">
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block mt-3" id="btn-submit-signin">
+                <span class="btn-icon">🔐</span> Sign In to Platform
+              </button>
+
+              <div style="margin-top: 1rem; text-align: center;">
+                <span style="color: var(--text-muted); font-size: 0.82rem;">New customer? </span>
+                <button type="button" class="btn btn-xs btn-outline" id="btn-goto-signup" onclick="switchAuthTab('signup')">
+                  Create Account (Sign Up) ➔
+                </button>
+              </div>
+
+              <div style="margin-top: 0.85rem; padding-top: 0.75rem; border-top: 1px solid rgba(255, 255, 255, 0.08); text-align: center; font-size: 0.8rem; color: var(--text-muted);">
+                <span>Support and Enquiry : Contact </span><a href="mailto:bjtmusic12@gmail.com" style="color: var(--accent-cyan); font-weight: 600;">bjtmusic12@gmail.com</a>
+              </div>
+            </form>
+
+            <!-- Form 2: Sign Up (Hidden by default) -->
+            <form id="form-auth-signup" style="display: none;">
+              <div class="form-group">
+                <label>Legal Entity / Individual Name</label>
+                <input type="text" id="signup-name" class="form-control" placeholder="Acme Holdings / Dr. Jane Vance">
+              </div>
+              <div class="form-group">
+                <label>Email ID *</label>
+                <input type="email" id="signup-email" class="form-control" placeholder="acme@investor.com" required>
+              </div>
+              <div class="form-group">
+                <label>Mobile Number</label>
+                <input type="tel" id="signup-mobile" class="form-control" placeholder="+1 (555) 234-5678">
+              </div>
+              <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="signup-password" class="form-control" placeholder="Create secure password">
+              </div>
+              <div class="form-group">
+                <label>Target Membership Desk</label>
+                <select id="signup-plan-choice" class="form-control">
+                  <option value="PRO_INDIVIDUAL">Professional Individual Desk ($299 USD / month)</option>
+                  <option value="FIRM">Institutional Firm Desk ($999 USD / month)</option>
+                  <option value="ENTERPRISE">Enterprise Sovereign Desk ($9,000 USD / month)</option>
+                </select>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block mt-3" id="btn-submit-signup">
+                <span class="btn-icon">🚀</span> Create Account & Proceed
+              </button>
+
+              <div style="margin-top: 1rem; text-align: center;">
+                <span style="color: var(--text-muted); font-size: 0.82rem;">Already registered? </span>
+                <button type="button" class="btn btn-xs btn-outline" id="btn-goto-signin" onclick="switchAuthTab('signin')">
+                  Sign In ➔
+                </button>
+              </div>
+              <div style="margin-top: 0.85rem; padding-top: 0.75rem; border-top: 1px solid rgba(255, 255, 255, 0.08); text-align: center; font-size: 0.8rem; color: var(--text-muted);">
+                <span>Support and Enquiry : Contact </span><a href="mailto:bjtmusic12@gmail.com" style="color: var(--accent-cyan); font-weight: 600;">bjtmusic12@gmail.com</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       LAYER 2: PRO CUSTOMERS & FIRM SUBSCRIPTION PRICING LAYER ($299 / $999)
+       ==================================================================== -->
+  <div class="gateway-layer hidden" id="layer-pricing" style="display: none;">
+    <div class="gateway-container" style="max-width: 1180px;">
+      <div class="gateway-header">
+        <div class="gateway-title-box">
+          <div class="logo-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+              <polyline points="2 17 12 22 22 17"></polyline>
+              <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+          </div>
+          <div>
+            <h2 style="font-size: 1.15rem; font-weight: 700; margin: 0;">GOX Institutional Membership & Trading Desks</h2>
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0;">Transparent monthly subscription tiers for private market participants</p>
+          </div>
+        </div>
+        <button type="button" class="btn btn-xs btn-ghost" id="btn-close-pricing">✕ Return to Exchange</button>
+      </div>
+
+      <div class="gateway-body">
+        <div style="text-align: center; max-width: 600px; margin: 0 auto 2rem;">
+          <h3 style="font-size: 1.5rem; font-weight: 800; color: #fff;">Choose Your Market Access Plan</h3>
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.35rem;">
+            Institutional grade order routing, continuous crossing liquidity, and dual-leg Delivery-versus-Payment clearing.
+          </p>
+        </div>
+
+        <!-- 2-Tier Pricing Grid -->
+        <div class="pricing-grid">
+          <!-- Plan 1: Professional Individual ($299/mo) -->
+          <div class="pricing-card" id="card-plan-pro">
+            <div>
+              <div class="pricing-tier-name">Professional Individual</div>
+              <div class="pricing-tier-desc">Designed for accredited individual investors, high-net-worth angels, and solo fund managers.</div>
+              <div class="pricing-cost">
+                <span class="pricing-currency">$</span>
+                <span class="pricing-amount">299</span>
+                <span class="pricing-cycle">USD / month</span>
+              </div>
+              <ul class="pricing-perks">
+                <li class="pricing-perk-item">
+                  <span class="pricing-perk-check">✓</span>
+                  <span>Accredited Secondary Private Equity Trading</span>
+                </li>
+                <li class="pricing-perk-item">
+                  <span class="pricing-perk-check">✓</span>
+                  <span>Level 2 Central Limit Order Book & VWAP Depth</span>
+                </li>
+                <li class="pricing-perk-item">
+                  <span class="pricing-perk-check">✓</span>
+                  <span>Continuous Price-Time Liquidity Matching Engine</span>
+                </li>
+                <li class="pricing-perk-item">
+                  <span class="pricing-perk-check">✓</span>
+                  <span>Delivery-versus-Payment (DvP) Atomic Settlement Gating</span>
+                </li>
+                <li class="pricing-perk-item">
+                  <span class="pricing-perk-check">✓</span>
+                  <span>Standard Support Desk Response (<a href="mailto:bjtmusic12@gmail.com" style="color: var(--accent-cyan);">bjtmusic12@gmail.com</a>)</span>
+                </li>
+              </ul>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">
+              <a href="https://buy.stripe.com/test_3cIaEPfJY9y53mL3022oE0f" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-block" style="text-decoration: none; text-align: center; font-weight: 700;">
+                💳 Pay $299 / Month via Stripe ➔
+              </a>
+              <button type="button" class="btn btn-outline btn-block" id="btn-choose-pro" style="font-size: 0.8rem;">
+                Select & Activate in Platform
+              </button>
+            </div>
+          </div>
+
+          <!-- Plan 2: Institutional Firm ($999/mo) -->
+          <div class="pricing-card featured" id="card-plan-firm">
+            <span class="pricing-badge-popular">INSTITUTIONAL TIER</span>
+            <div>
+              <div class="pricing-tier-name">Institutional Firm & Broker</div>
+              <div class="pricing-tier-desc">Complete multi-seat infrastructure for venture SPVs, private equity firms, broker-dealers & transfer agents.</div>
+              <div class="pricing-cost">
+                <span class="pricing-currency">$</span>
+                <span class="pricing-amount">999</span>
+                <span class="pricing-cycle">USD / month</span>
+              </div>
+              <ul class="pricing-perks">
+                <li class="pricing-perk-item">
+                  <span class="pricing-perk-check">✓</span>
+                  <span>Everything in Professional Individual Plan</span>
+                </li>
+                <li class="pricing-perk-item">
+                  <span class="pricing-perk-check">✓</span>
+                  <span>Multi-Seat Firm Desks & Organization Beneficial Owners</span>
+                </li>
+                <li class="pricing-perk-item">
+                  <span class="pricing-perk-check">✓</span>
+                  <span>Multi-Issuer Real-Time Dynamic Cap Table Ledger</span>
+                </li>
+                <li class="pricing-perk-item">
+                  <span class="pricing-perk-check">✓</span>
+                  <span>Custom Programmable Smart Transfer Restrictions</span>
+                </li>
+                <li class="pricing-perk-item">
+                  <span class="pricing-perk-check">✓</span>
+                  <span>Direct Broker-Dealer Venues & RFQ Block Negotiations</span>
+                </li>
+                <li class="pricing-perk-item">
+                  <span class="pricing-perk-check">✓</span>
+                  <span>Cryptographic Merkle Proof Settlement Receipts</span>
+                </li>
+                <li class="pricing-perk-item">
+                  <span class="pricing-perk-check">✓</span>
+                  <span>Priority 24/7 Dedicated Support (<a href="mailto:bjtmusic12@gmail.com" style="color: var(--accent-cyan);">bjtmusic12@gmail.com</a>)</span>
+                </li>
+              </ul>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">
+              <a href="https://buy.stripe.com/test_00w8wHeFU8u1cXl8km2oE0g" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-block" style="text-decoration: none; text-align: center; font-weight: 700; background: linear-gradient(135deg, #6366f1, #06b6d4);">
+                💳 Pay $999 / Month via Stripe ➔
+              </a>
+              <button type="button" class="btn btn-outline btn-block" id="btn-choose-firm" style="font-size: 0.8rem;">
+                Select & Activate in Platform
+              </button>
+            </div>
+          </div>
+
+          <!-- Plan 3: Enterprise ($9,000/mo) -->
+          <div class="pricing-card enterprise" id="card-plan-enterprise">
+            <span class="pricing-badge-enterprise">ENTERPRISE TIER</span>
+            <div>
+              <div class="pricing-tier-name">Enterprise & Sovereign</div>
+              <div class="pricing-tier-desc">Unlimited institutional capacity, dedicated private cloud matching engine, custom clearing rules, and 24/7 sovereign desk routing.</div>
+              <div class="pricing-cost">
+                <span class="pricing-currency">$</span>
+                <span class="pricing-amount">9,000</span>
+                <span class="pricing-cycle">USD / month</span>
+              </div>
+              <ul class="pricing-perks">
+                <li class="pricing-perk-item">
+                  <span class="pricing-perk-check">✓</span>
+                  <span>Everything in Institutional Firm Plan</span>
+                </li>
+                <li class="pricing-perk-item">
+                  <span class="pricing-perk-check">✓</span>
+                  <span>Unlimited Seats & Sovereign Institutional Custody Desks</span>
+                </li>
+                <li class="pricing-perk-item">
+                  <span class="pricing-perk-check">✓</span>
+                  <span>Dedicated Sub-Millisecond DvP Atomic Settlement Highway</span>
+                </li>
+                <li class="pricing-perk-item">
+                  <span class="pricing-perk-check">✓</span>
+                  <span>Custom Smart Transfer Programmable Ownership Protocols</span>
+                </li>
+                <li class="pricing-perk-item">
+                  <span class="pricing-perk-check">✓</span>
+                  <span>White-Glove Institutional Onboarding & Regulatory Auditing</span>
+                </li>
+                <li class="pricing-perk-item">
+                  <span class="pricing-perk-check">✓</span>
+                  <span>Dedicated Account Director & Priority Desk (<a href="mailto:bjtmusic12@gmail.com" style="color: var(--accent-cyan);">bjtmusic12@gmail.com</a>)</span>
+                </li>
+              </ul>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">
+              <a href="https://buy.stripe.com/test_fZubIT7ds6lT9L9fMO2oE0h" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-block" style="text-decoration: none; text-align: center; font-weight: 700; background: linear-gradient(135deg, #0ea5e9, #6366f1); border-color: rgba(99, 102, 241, 0.6);">
+                💳 Pay $9,000 / Month via Stripe ➔
+              </a>
+              <button type="button" class="btn btn-outline btn-block" id="btn-choose-enterprise" style="font-size: 0.8rem;">
+                Select & Activate in Platform
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Plan Banner & Proceed -->
+        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">CURRENT ACTIVE STATUS:</span>
+            <span id="pricing-active-plan-badge" class="font-bold text-primary" style="font-size: 1rem;">Select a Membership Plan</span>
+          </div>
+          <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <button class="btn btn-outline" id="btn-pricing-support-link">
+              <span class="btn-icon">🎧</span> Inquire / Billing Support
+            </button>
+            <button class="btn btn-primary" id="btn-enter-platform-from-pricing">
+              Proceed to Trading Platform ➔
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       LAYER 3: CUSTOMER SUPPORT & ENQUIRY CONTACT (bjtmusic12@gmail.com)
+       ==================================================================== -->
+  <div class="modal-overlay hidden" id="modal-support-enquiry">
+    <div class="modal-content" style="max-width: 620px;">
+      <div class="modal-header">
+        <div>
+          <h3>🎧 Customer Support & Institutional Enquiry</h3>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Direct channel to platform specialists & desk operations</p>
+        </div>
+        <button class="modal-close" onclick="toggleModal('modal-support-enquiry')">✕</button>
+      </div>
+
+      <!-- Support Header Banner -->
+      <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: var(--radius-sm); padding: 1rem; margin: 1.25rem 1.25rem 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); font-weight: 700;">Direct Contact Address</div>
+          <div style="font-size: 1rem; font-weight: 700; color: var(--accent-cyan); font-family: var(--font-mono);">bjtmusic12@gmail.com</div>
+        </div>
+        <a href="mailto:bjtmusic12@gmail.com?subject=GOX%20Exchange%20Platform%20Enquiry" class="btn btn-xs btn-outline" id="btn-mailto-support" target="_blank">
+          <span class="btn-icon">✉</span> Open Mail Client
+        </a>
+      </div>
+
+      <form id="form-support-enquiry" style="padding: 1.25rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group mb-3">
+            <label>Your Name</label>
+            <input type="text" id="support-name" class="form-control form-control-sm" placeholder="Full name" required>
+          </div>
+          <div class="form-group mb-3">
+            <label>Your Email ID</label>
+            <input type="email" id="support-email" class="form-control form-control-sm" placeholder="you@firm.com" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group mb-3">
+            <label>Mobile Number</label>
+            <input type="tel" id="support-mobile" class="form-control form-control-sm" placeholder="+1 (555) 000-0000">
+          </div>
+          <div class="form-group mb-3">
+            <label>Enquiry Category</label>
+            <select id="support-subject" class="form-control form-control-sm">
+              <option value="Enterprise Sovereign Tier ($9,000/mo)">Enterprise Sovereign Tier ($9,000/mo) Onboarding</option>
+              <option value="Institutional Firm Tier ($999/mo)">Institutional Firm Tier ($999/mo) Onboarding</option>
+              <option value="Professional Individual ($299/mo)">Professional Individual ($299/mo) Subscription</option>
+              <option value="Cap Table & Equity Onboarding">Cap Table & Equity Registry Onboarding</option>
+              <option value="Liquidity Matching & DvP Settlements">Liquidity Matching & DvP Settlements</option>
+              <option value="Regulatory KYC/KYB Compliance">Regulatory KYC/KYB Compliance Inquiry</option>
+              <option value="General Technical Support">General Technical Support</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group mb-3">
+          <label>Enquiry Message</label>
+          <textarea id="support-message" rows="4" class="form-control form-control-sm" placeholder="Please describe your requirements, questions, or assistance needed..." required></textarea>
+        </div>
+
+        <div class="modal-footer" style="padding: 0.75rem 0 0; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.75rem; color: var(--text-dim);">Dispatched directly to bjtmusic12@gmail.com</span>
+          <div style="display: flex; gap: 0.5rem;">
+            <button type="button" class="btn btn-ghost" onclick="toggleModal('modal-support-enquiry')">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="btn-submit-support">
+              <span class="btn-icon">🚀</span> Submit Enquiry
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="app.js?v=20260926_7"></script>
+</body>
+</html>
