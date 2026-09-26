@@ -1450,45 +1450,7 @@ function updateMatchingOrderNotional() {
 document.getElementById('matching-order-price')?.addEventListener('input', updateMatchingOrderNotional);
 document.getElementById('matching-order-qty')?.addEventListener('input', updateMatchingOrderNotional);
 
-// Direct Order Submission Form Handler
-const formMatchingOrder = document.getElementById('form-matching-order');
-if (formMatchingOrder) {
-  formMatchingOrder.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const participantId = document.getElementById('matching-participant-select').value;
-    const securityId = document.getElementById('matching-security-select').value;
-    const price = parseFloat(document.getElementById('matching-order-price').value);
-    const quantity = parseInt(document.getElementById('matching-order-qty').value);
-
-    try {
-      const res = await fetch(`${API_BASE}/v1/orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          participantId,
-          securityId,
-          side: matchingSelectedSide,
-          priceMinor: Math.round(price * 100),
-          quantity
-        })
-      });
-
-      if (res.ok) {
-        showToast(`Order Placed: ${matchingSelectedSide} ${quantity.toLocaleString()} ${securityId} @ $${price.toFixed(2)}`, 'success');
-        await refreshAllData();
-        await loadOrders();
-        await loadTrades();
-        if (matchingOrderCard) matchingOrderCard.style.display = 'none';
-        if (btnToggleDrawer) btnToggleDrawer.classList.remove('active');
-      } else {
-        const err = await res.json();
-        showToast(`Order Denied: ${err.error || 'Pre-trade gate violation'}`, 'danger');
-      }
-    } catch (err) {
-      showToast(err.message, 'danger');
-    }
-  });
-}
+// Handled via window.handleMatchingOrderSubmit
 
 window.initiateDvPFromTrade = async (tradeId, securityId, quantity, priceMinor, buyerId, sellerId) => {
   try {

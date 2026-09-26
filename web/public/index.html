@@ -637,7 +637,12 @@
           <form id="form-place-order">
             <div class="form-group">
               <label>Participant</label>
-              <select id="order-participant-select" class="form-control" required></select>
+              <select id="order-participant-select" class="form-control" required>
+                <option value="PART-APOLLO">Apollo Global Liquidity LLC (USA • VERIFIED)</option>
+                <option value="PART-SEQUOIA">Sequoia Growth Holdings Ltd (CYM • VERIFIED)</option>
+                <option value="PART-HORIZON">Horizon Capital Partners (GBR • VERIFIED)</option>
+                <option value="PART-CITADEL">Citadel Institutional Custody (USA • VERIFIED)</option>
+              </select>
             </div>
             <div class="side-selector">
               <button type="button" class="btn-side btn-buy active" id="btn-side-buy">BUY</button>
@@ -760,7 +765,7 @@
               <input type="number" step="1" min="1" id="matching-order-qty" class="form-control form-control-sm font-mono" placeholder="5000" value="5000" required>
             </div>
             <div class="form-group mb-0">
-              <button type="submit" class="btn btn-sm btn-primary btn-block" id="btn-matching-submit-order" style="height: 38px;">
+              <button type="submit" class="btn btn-sm btn-primary btn-block" id="btn-matching-submit-order" onclick="window.handleMatchingOrderSubmit(event)" style="height: 38px;">
                 <span>⚡ Place Order</span>
               </button>
             </div>
@@ -1647,6 +1652,6 @@
   <!-- Toast Notification Container -->
   <div id="toast-container" class="toast-container"></div>
 
-  <script src="app.js?v=20260926_master_v1"></script>
+  <script src="app.js?v=20260926_order_fix_v2"></script>
 </body>
 </html>
