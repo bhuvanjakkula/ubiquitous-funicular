@@ -53,12 +53,13 @@
     <div class="header-actions">
       <!-- Quick Layer Nav Switchers -->
       <button type="button" class="btn btn-xs btn-outline" id="btn-nav-layer1" onclick="window.showLayer1()" style="border-color: rgba(56, 189, 248, 0.5); color: var(--accent-cyan); font-weight: 700;">
-        <span>🔐</span> Layer 1: Auth Gate
+        <span>🔐</span> Layer 1: Sign In / Up
       </button>
-      <button type="button" class="btn btn-xs btn-outline" id="btn-nav-layer2" >
-      </button>
-      <button type="button" class="btn btn-xs btn-ghost text-muted" id="btn-nav-signout" onclick="window.signOut()">Sign Out onclick="window.showLayer2()" style="border-color: rgba(99, 102, 241, 0.5); color: #a5b4fc; font-weight: 700;">
+      <button type="button" class="btn btn-xs btn-outline" id="btn-nav-layer2" onclick="window.showLayer2()" style="border-color: rgba(99, 102, 241, 0.5); color: #a5b4fc; font-weight: 700;">
         <span>💳</span> Layer 2: Pricing Models
+      </button>
+      <button type="button" class="btn btn-xs btn-ghost text-muted" id="btn-nav-signout" onclick="window.signOut()">
+        Sign Out
       </button>
       <!-- User Profile Badge & Membership -->
       <div id="header-user-badge" class="header-user-badge" style="cursor: pointer;" title="Institutional Account">
@@ -1278,7 +1279,7 @@
   <!-- ====================================================================
        LAYER 1: SIGN IN & SIGN UP GATEWAY LAYER (FIRST PAGE LAYER)
        ==================================================================== -->
-  <div class="gateway-layer" id="layer-auth">
+  <div class="gateway-layer" id="layer-auth" style="display: flex;">
     <div class="gateway-container">
       <div class="gateway-header">
         <div class="gateway-title-box">
@@ -1366,7 +1367,7 @@
               </div>
 
               <button type="button" class="btn btn-sm btn-outline mb-2" id="btn-auth-instant-owner" onclick="window.enterPlatform()" style="width: 100%; border-color: rgba(56, 189, 248, 0.5); color: var(--accent-cyan); background: rgba(56, 189, 248, 0.08); font-weight: 700;">
-                ⚡ Instant Owner / Executive Access (bhuvanjakkula@gmail.com)
+                ⚡ Instant Executive Access
               </button>
               <button type="submit" class="btn btn-primary btn-block mt-1" id="btn-submit-signin">
                 <span class="btn-icon">🔐</span> Sign In to Platform

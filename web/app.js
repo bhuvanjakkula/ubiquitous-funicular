@@ -56,26 +56,7 @@ window.handleOrderPlacement = async (e) => {
   return false;
 };
 
-// Auto-seed executive session for seamless dashboard access
-try {
-  if (!localStorage.getItem('gox_current_user')) {
-    const defaultOwner = {
-      id: 'USR-OWNER-01',
-      email: 'bhuvanjakkula@gmail.com',
-      name: 'Executive',
-      role: 'OWNER',
-      roles: ['OWNER', 'SUPER_ADMIN', 'ADMIN', 'COMPLIANCE'],
-      plan: 'OWNER_PRO',
-      planName: 'Enterprise',
-      planPriceUSD: 0,
-      isOwner: true,
-      hasPaid: true,
-      status: 'VERIFIED'
-    };
-    localStorage.setItem('gox_current_user', JSON.stringify(defaultOwner));
-    sessionStorage.setItem('gox_session_active', 'true');
-  }
-} catch (e) {}
+// Auto-seed disabled so Layer 1 always opens on page load
 
 /**
  * GOX — Global Ownership Exchange
@@ -2350,41 +2331,12 @@ function initAuthAndPricingLayer() {
   // Pre-fill owner email for convenience
   const sInput = document.getElementById('signin-email');
   if (sInput && !sInput.value) {
-    sInput.value = OWNER_EMAIL;
+    // sInput.value left clean for user typing
   }
 
   // Check if session is already active
-  const hasActiveSession = sessionStorage.getItem('gox_session_active') === 'true';
-  if (hasActiveSession) {
-    if (!storedUser) {
-      storedUser = {
-        id: 'USR-OWNER-01',
-        email: OWNER_EMAIL,
-        name: 'Executive',
-        role: 'OWNER',
-        roles: ['OWNER', 'SUPER_ADMIN', 'ADMIN', 'COMPLIANCE'],
-        plan: 'OWNER_PRO',
-        planName: 'Enterprise',
-        planPriceUSD: 0,
-        isOwner: true,
-        hasPaid: true,
-        status: 'VERIFIED'
-      };
-      localStorage.setItem('gox_current_user', JSON.stringify(storedUser));
-    }
-    updateUserDisplay(storedUser);
-    if (layerAuth) {
-      layerAuth.classList.add('hidden');
-      layerAuth.style.display = 'none';
-    }
-    if (layerPricing) {
-      layerPricing.classList.add('hidden');
-      layerPricing.style.display = 'none';
-    }
-  } else {
-    // Show First Web Page Layer (Sign In / Sign Up Gateway)
-    window.showLayer1();
-  }
+  // Always present Layer 1 (Sign In & Sign Up Gateway) first on page arrival
+  window.showLayer1();
 
   // Tab switching between Sign In and Sign Up
   window.switchAuthTab = (tab) => {
