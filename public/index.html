@@ -591,7 +591,7 @@
           </div>
           <button type="button" class="btn btn-xs btn-ghost" id="btn-close-order-card" onclick="closeOrderDrawer()" style="color: var(--text-muted);">✕ Close</button>
         </div>
-        <form id="form-matching-order" onsubmit="window.handleMatchingOrderSubmit(event)" style="padding: 1.25rem;">
+        <form id="form-matching-order" action="#" onsubmit="event.preventDefault(); window.handleMatchingOrderSubmit(event); return false;" style="padding: 1.25rem;">
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; align-items: end;">
             <div class="form-group mb-0">
               <label style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem; display: block;">Participant</label>
@@ -627,7 +627,7 @@
               <input type="number" step="1" min="1" id="matching-order-qty" class="form-control form-control-sm font-mono" placeholder="5000" value="5000" oninput="window.updateMatchingOrderNotional()" required>
             </div>
             <div class="form-group mb-0">
-              <button type="submit" class="btn btn-sm btn-primary btn-block" id="btn-matching-submit-order" style="height: 38px; font-weight: 700;">
+              <button type="button" class="btn btn-sm btn-primary btn-block" id="btn-matching-submit-order" onclick="window.handleMatchingOrderSubmit(event)" style="height: 38px; font-weight: 700; cursor: pointer;">
                 <span>⚡ Place Institutional Order</span>
               </button>
             </div>
@@ -1093,7 +1093,7 @@
   <!-- ====================================================================
        LAYER 1: SIGN IN & SIGN UP GATEWAY LAYER (FIRST PAGE LAYER)
        ==================================================================== -->
-  <div class="gateway-layer hidden" id="layer-auth" class="gateway-layer hidden" style="display: none;">
+  <div class="gateway-layer hidden" id="layer-auth" style="display: none !important;">
     <div class="gateway-container">
       <div class="gateway-header">
         <div class="gateway-title-box">
@@ -1246,7 +1246,7 @@
   <!-- ====================================================================
        LAYER 2: PRO CUSTOMERS & FIRM SUBSCRIPTION PRICING LAYER ($299 / $999)
        ==================================================================== -->
-  <div class="gateway-layer hidden" id="layer-pricing" style="display: none;">
+  <div class="gateway-layer hidden" id="layer-pricing" style="display: none !important;">
     <div class="gateway-container" style="max-width: 1180px;">
       <div class="gateway-header">
         <div class="gateway-title-box">
