@@ -1,0 +1,3 @@
+import { createHash } from 'node:crypto';import { IdentityService, AuthService } from '../src/identity.js';import { ComplianceService } from '../src/compliance.js';import { OwnershipService } from '../src/ownership.js';
+export class Audit{constructor(){this.r=[]}append(x){const b={...x,at:new Date().toISOString()},r={...b,hash:createHash('sha256').update(JSON.stringify(b)).digest('hex')};this.r.push(r);return r}all(){return this.r}}
+export const createTestPlatform=()=>{const audit=new Audit(),identity=new IdentityService({audit}),compliance=new ComplianceService({identity,audit});return {audit,identity,auth:new AuthService('test'),compliance,ownership:new OwnershipService({identity,compliance,audit})}}

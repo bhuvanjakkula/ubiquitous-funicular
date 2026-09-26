@@ -1,0 +1,13 @@
+{
+  "name": "gox-platform-deployment",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node gox-platform/src/server.js",
+    "test": "node --test gox-platform/test/*.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
