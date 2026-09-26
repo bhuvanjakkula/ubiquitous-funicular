@@ -528,158 +528,10 @@
             <h2 class="card-title">Institutional Multi-Issuer Cap Table</h2>
             <p class="card-desc">Live shareholder ledger with atomic ownership reconciliation</p>
           </div>
-          <div class="card-actions-row">
-            <select id="captable-issuer-filter" class="form-control form-control-sm">
-              <option value="ISS-SPACEX">Space Exploration Technologies Corp. (SpaceX)</option>
-              <option value="ISS-ANTHROPIC">Anthropic PBC</option>
-              <option value="ISS-STRIPE">Stripe Inc.</option>
-            </select>
-            <button class="btn btn-sm btn-primary" onclick="toggleModal('modal-manual-transfer')">Execute Transfer</button>
-          </div>
-        </div>
-
-        <!-- Cap Table Distribution Bar -->
-        <div class="captable-viz-container">
-          <div class="captable-viz-label">Ownership Distribution</div>
-          <div class="captable-bar" id="captable-bar"></div>
-          <div class="captable-legend" id="captable-legend"></div>
-        </div>
-
-        <div class="table-responsive mt-4">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Shareholder</th>
-                <th>Participant ID</th>
-                <th>Security Class</th>
-                <th>Quantity</th>
-                <th>Ownership %</th>
-                <th>Last Reconciled</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="table-captable-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 6: ORDER BOOK & PRICING -->
-    <section class="tab-pane" id="tab-orderbook">
-      <div class="pricing-top-strip">
-        <div class="security-selector-box">
-          <label>Selected Asset:</label>
-          <select id="pricing-security-select" class="form-control">
-            <option value="SPCX-N">SPCX-N — SpaceX Series N Preferred</option>
-            <option value="ANTH-C">ANTH-C — Anthropic Series C</option>
-            <option value="STRP-A">STRP-A — Stripe Class A</option>
-          </select>
-        </div>
-        <div class="pricing-stat-item">
-          <span class="stat-lbl">BEST BID:</span>
-          <span class="stat-num text-success" id="ref-best-bid">--</span>
-        </div>
-        <div class="pricing-stat-item">
-          <span class="stat-lbl">BEST ASK:</span>
-          <span class="stat-num text-danger" id="ref-best-ask">--</span>
-        </div>
-        <div class="pricing-stat-item">
-          <span class="stat-lbl">MID-MARKET:</span>
-          <span class="stat-num text-primary" id="ref-mid-price">--</span>
-        </div>
-        <div class="pricing-stat-item">
-          <span class="stat-lbl">SPREAD:</span>
-          <span class="stat-num text-warning" id="ref-spread">--</span>
-        </div>
-        <div class="pricing-stat-item">
-          <span class="stat-lbl">VWAP:</span>
-          <span class="stat-num" id="ref-vwap">--</span>
-        </div>
-      </div>
-
-      <div class="panel-layout">
-        <!-- Order Book Depth Ladder -->
-        <div class="card flex-2">
-          <div class="card-header">
-            <div>
-              <h3 class="card-title">Level 2 Depth Ladder</h3>
-              <p class="card-desc">Visual aggregate depth across price tiers</p>
-            </div>
-            <button class="btn btn-xs btn-outline" id="btn-refresh-depth">↻ Refresh Depth</button>
-          </div>
-          <div class="depth-ladder-container">
-            <div class="depth-col">
-              <div class="depth-header text-success">BIDS (BUY ORDERS)</div>
-              <div class="depth-table-header">
-                <span>Total Qty</span>
-                <span>Cumulative</span>
-                <span>Bid Price</span>
-              </div>
-              <div id="depth-bids-list" class="depth-list"></div>
-            </div>
-            <div class="depth-col">
-              <div class="depth-header text-danger">ASKS (SELL ORDERS)</div>
-              <div class="depth-table-header">
-                <span>Ask Price</span>
-                <span>Cumulative</span>
-                <span>Total Qty</span>
-              </div>
-              <div id="depth-asks-list" class="depth-list"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Place Order Form -->
-        <div class="card flex-1">
-          <div class="card-header">
-            <h3 class="card-title">Place Institutional Order</h3>
-          </div>
-          <form id="form-place-order">
-            <div class="form-group">
-              <label>Participant</label>
-              <select id="order-participant-select" class="form-control" required>
-                <option value="PART-APOLLO">Apollo Global Liquidity LLC (USA • VERIFIED)</option>
-                <option value="PART-SEQUOIA">Sequoia Growth Holdings Ltd (CYM • VERIFIED)</option>
-                <option value="PART-HORIZON">Horizon Capital Partners (GBR • VERIFIED)</option>
-                <option value="PART-CITADEL">Citadel Institutional Custody (USA • VERIFIED)</option>
-              </select>
-            </div>
-            <div class="side-selector">
-              <button type="button" class="btn-side btn-buy active" id="btn-side-buy">BUY</button>
-              <button type="button" class="btn-side btn-sell" id="btn-side-sell">SELL</button>
-            </div>
-            <div class="form-group">
-              <label>Price ($ per share)</label>
-              <input type="number" step="0.01" id="order-price" class="form-control" placeholder="112.50" required>
-            </div>
-            <div class="form-group">
-              <label>Quantity (Shares)</label>
-              <input type="number" id="order-quantity" class="form-control" placeholder="5000" required>
-            </div>
-            <div class="order-summary-box">
-              <div class="d-flex justify-between">
-                <span>Gross Trade Value:</span>
-                <span class="text-mono font-bold" id="order-est-total">$0.00</span>
-              </div>
-            </div>
-            <button type="submit" class="btn btn-primary btn-block mt-3" id="btn-submit-order">Submit Order to Book</button>
-          </form>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 7: LIQUIDITY & MATCHING -->
-    <section class="tab-pane" id="tab-matching">
-      <div class="card mb-4">
-        <div class="card-header" style="flex-wrap: wrap; gap: 1rem;">
-          <div>
-            <h2 class="card-title">Liquidity Matching Engine</h2>
-            <p class="card-desc">Continuous price-time crossing with automated trade generation & dual-leg DvP settlement</p>
-          </div>
           <div class="card-actions-row" style="flex-wrap: wrap; gap: 0.5rem; align-items: center;">
             <!-- Asset Filter -->
             <div style="display: flex; align-items: center; gap: 0.35rem;">
-              <label for="filter-matching-asset" style="font-size: 0.75rem; color: var(--text-muted); margin: 0; text-transform: uppercase;">Filter Asset:</label>
+              <label for="filter-matching-asset" style="font-size: 0.75rem; color: var(--text-muted); margin: 0; text-transform: uppercase;">Asset:</label>
               <select id="filter-matching-asset" onchange="window.filterMatchingByAsset(this.value)" class="form-control form-control-sm" style="width: 140px; padding: 0.25rem 0.5rem; font-size: 0.8rem; background: var(--bg-secondary);">
                 <option value="ALL">All Assets</option>
                 <option value="SPCX-N">SPCX — SpaceX</option>
@@ -688,6 +540,16 @@
                 <option value="ANDR-D">ANDR — Anduril</option>
               </select>
             </div>
+
+            <!-- Instant Place Order / Quick Buy Button -->
+            <button class="btn btn-sm btn-success" id="btn-quick-buy-order" onclick="window.quickBuyOrder()" title="Instantly place an institutional BUY order into the order book">
+              <span class="btn-icon">⚡</span> + Instant Buy Order
+            </button>
+
+            <!-- Instant Place Sell Order Button -->
+            <button class="btn btn-sm btn-danger" id="btn-quick-sell-order" onclick="window.quickSellOrder()" title="Instantly place an institutional SELL order into the order book">
+              <span class="btn-icon">⚡</span> + Instant Sell Order
+            </button>
 
             <!-- Run Matching Engine -->
             <button class="btn btn-sm btn-primary" id="btn-trigger-match" onclick="window.runMatchingEngine()" title="Cross overlapping orders in the order book">
@@ -700,8 +562,8 @@
             </button>
 
             <!-- Toggle Place Order Panel -->
-            <button class="btn btn-sm btn-outline" id="btn-toggle-order-drawer" onclick="window.toggleOrderDrawer()" title="Open or close order entry panel">
-              <span class="btn-icon">➕</span> Place Order
+            <button class="btn btn-sm btn-outline" id="btn-toggle-order-drawer" onclick="window.openOrderEntry()" title="Focus the direct order entry form below">
+              <span class="btn-icon">📝</span> Custom Order Form
             </button>
 
             <!-- Cancel All Open Orders -->
@@ -718,7 +580,7 @@
       </div>
 
       <!-- Quick Order Entry Card (Collapsible) -->
-      <div class="card mb-4" id="matching-order-card" style="display: none; border: 1px solid var(--border-focus); background: rgba(12, 18, 32, 0.95);">
+      <div class="card mb-4" id="matching-order-card" style="display: block; border: 1px solid var(--border-focus); background: rgba(12, 18, 32, 0.95);">
         <div class="card-header" style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem;">
           <div>
             <h3 class="card-title text-primary" style="font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">
@@ -729,7 +591,7 @@
           </div>
           <button type="button" class="btn btn-xs btn-ghost" id="btn-close-order-card" onclick="closeOrderDrawer()" style="color: var(--text-muted);">✕ Close</button>
         </div>
-        <form id="form-matching-order" onsubmit="handleMatchingOrderSubmit(event)" style="padding: 1.25rem;">
+        <form id="form-matching-order" action="#" onsubmit="event.preventDefault(); window.handleMatchingOrderSubmit(event); return false;" style="padding: 1.25rem;">
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; align-items: end;">
             <div class="form-group mb-0">
               <label style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem; display: block;">Participant</label>
@@ -758,15 +620,15 @@
             </div>
             <div class="form-group mb-0">
               <label style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem; display: block;">Limit Price ($)</label>
-              <input type="number" step="0.01" min="0.01" id="matching-order-price" class="form-control form-control-sm font-mono" placeholder="113.00" value="113.00" required>
+              <input type="number" step="0.01" min="0.01" id="matching-order-price" class="form-control form-control-sm font-mono" placeholder="113.00" value="113.00" oninput="window.updateMatchingOrderNotional()" required>
             </div>
             <div class="form-group mb-0">
               <label style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem; display: block;">Quantity (Shares)</label>
-              <input type="number" step="1" min="1" id="matching-order-qty" class="form-control form-control-sm font-mono" placeholder="5000" value="5000" required>
+              <input type="number" step="1" min="1" id="matching-order-qty" class="form-control form-control-sm font-mono" placeholder="5000" value="5000" oninput="window.updateMatchingOrderNotional()" required>
             </div>
             <div class="form-group mb-0">
-              <button type="submit" class="btn btn-sm btn-primary btn-block" id="btn-matching-submit-order" onclick="window.handleMatchingOrderSubmit(event)" style="height: 38px;">
-                <span>⚡ Place Order</span>
+              <button type="button" class="btn btn-sm btn-primary btn-block" id="btn-matching-submit-order" onclick="window.handleMatchingOrderSubmit(event)" style="height: 38px; font-weight: 700; cursor: pointer;">
+                <span>⚡ Place Institutional Order</span>
               </button>
             </div>
           </div>
@@ -1231,7 +1093,7 @@
   <!-- ====================================================================
        LAYER 1: SIGN IN & SIGN UP GATEWAY LAYER (FIRST PAGE LAYER)
        ==================================================================== -->
-  <div class="gateway-layer hidden" id="layer-auth" class="gateway-layer hidden" style="display: none;">
+  <div class="gateway-layer hidden" id="layer-auth" style="display: none !important;">
     <div class="gateway-container">
       <div class="gateway-header">
         <div class="gateway-title-box">
@@ -1384,7 +1246,7 @@
   <!-- ====================================================================
        LAYER 2: PRO CUSTOMERS & FIRM SUBSCRIPTION PRICING LAYER ($299 / $999)
        ==================================================================== -->
-  <div class="gateway-layer hidden" id="layer-pricing" style="display: none;">
+  <div class="gateway-layer hidden" id="layer-pricing" style="display: none !important;">
     <div class="gateway-container" style="max-width: 1180px;">
       <div class="gateway-header">
         <div class="gateway-title-box">

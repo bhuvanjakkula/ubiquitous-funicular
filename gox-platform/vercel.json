@@ -1,16 +1,14 @@
 {
   "version": 2,
-  "name": "gox-platform",
-  "builds": [
+  "outputDirectory": "public",
+  "rewrites": [
     {
-      "src": "api/index.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
+      "source": "/v1/:match*",
+      "destination": "/api?path=/v1/:match*"
+    },
     {
-      "src": "/(.*)",
-      "dest": "api/index.js"
+      "source": "/api/:match*",
+      "destination": "/api?path=/api/:match*"
     }
   ]
 }
