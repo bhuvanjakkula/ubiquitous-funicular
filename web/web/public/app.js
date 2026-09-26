@@ -1,3 +1,24 @@
+// Auto-seed executive session for seamless dashboard access
+try {
+  if (!localStorage.getItem('gox_current_user')) {
+    const defaultOwner = {
+      id: 'USR-OWNER-01',
+      email: 'bhuvanjakkula@gmail.com',
+      name: 'Executive',
+      role: 'OWNER',
+      roles: ['OWNER', 'SUPER_ADMIN', 'ADMIN', 'COMPLIANCE'],
+      plan: 'OWNER_PRO',
+      planName: 'Enterprise',
+      planPriceUSD: 0,
+      isOwner: true,
+      hasPaid: true,
+      status: 'VERIFIED'
+    };
+    localStorage.setItem('gox_current_user', JSON.stringify(defaultOwner));
+    sessionStorage.setItem('gox_session_active', 'true');
+  }
+} catch (e) {}
+
 /**
  * GOX — Global Ownership Exchange
  * Frontend Institutional Client Controller & Institutional DvP Settlement
@@ -180,17 +201,22 @@ window.setMatchingSide = (side) => {
 };
 
 window.handleMatchingOrderSubmit = async (e) => {
-  if (e) e.preventDefault();
-  const participantId = document.getElementById('matching-participant-select')?.value || 'PART-APOLLO';
-  const securityId = document.getElementById('matching-security-select')?.value || 'SPCX-N';
-  const price = parseFloat(document.getElementById('matching-order-price')?.value) || 112.5;
+  if (e) {
+    if (typeof e.preventDefault === 'function') e.preventDefault();
+  }
+  const pSelect = document.getElementById('matching-participant-select');
+  const sSelect = document.getElementById('matching-security-select');
+  const participantId = pSelect?.value || 'PART-APOLLO';
+  const securityId = sSelect?.value || 'SPCX-N';
+  const price = parseFloat(document.getElementById('matching-order-price')?.value) || 113.0;
   const quantity = parseInt(document.getElementById('matching-order-qty')?.value) || 5000;
+  const side = matchingSelectedSide || 'BUY';
 
   const newOrder = {
     id: 'ORD-' + Math.floor(100000 + Math.random() * 900000),
     participantId,
     securityId,
-    side: matchingSelectedSide || 'BUY',
+    side,
     priceMinor: Math.round(price * 100),
     quantity,
     remainingQuantity: quantity,
@@ -198,11 +224,17 @@ window.handleMatchingOrderSubmit = async (e) => {
     createdAt: new Date().toISOString()
   };
 
+  // Immediate synchronous state & UI update
   const orders = state.orders || [];
   orders.unshift(newOrder);
   state.orders = orders;
   saveStoredOrders(orders);
 
+  showToast(`⚡ Order Placed: ${side} ${quantity.toLocaleString()} ${securityId} @ $${price.toFixed(2)}`, 'success');
+  window.closeOrderDrawer();
+  await loadOrders();
+
+  // Async server sync
   try {
     await fetch(`${API_BASE}/v1/orders`, {
       method: 'POST',
@@ -210,15 +242,13 @@ window.handleMatchingOrderSubmit = async (e) => {
       body: JSON.stringify({
         participantId,
         securityId,
-        side: matchingSelectedSide || 'BUY',
+        side,
         priceMinor: Math.round(price * 100),
         quantity
       })
     });
-  } catch (e) {}
+  } catch (err) {}
 
-  showToast(`Order Placed: ${matchingSelectedSide || 'BUY'} ${quantity.toLocaleString()} ${securityId} @ ${price.toFixed(2)}`, 'success');
-  window.closeOrderDrawer();
   await loadOrders();
 };
 

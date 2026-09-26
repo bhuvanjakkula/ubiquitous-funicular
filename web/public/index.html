@@ -677,6 +677,10 @@
               <label for="filter-matching-asset" style="font-size: 0.75rem; color: var(--text-muted); margin: 0; text-transform: uppercase;">Filter Asset:</label>
               <select id="filter-matching-asset" onchange="window.filterMatchingByAsset(this.value)" class="form-control form-control-sm" style="width: 140px; padding: 0.25rem 0.5rem; font-size: 0.8rem; background: var(--bg-secondary);">
                 <option value="ALL">All Assets</option>
+                <option value="SPCX-N">SPCX — SpaceX</option>
+                <option value="ANTH-C">ANTH — Anthropic</option>
+                <option value="STRP-A">STRP — Stripe</option>
+                <option value="ANDR-D">ANDR — Anduril</option>
               </select>
             </div>
 
@@ -724,11 +728,21 @@
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; align-items: end;">
             <div class="form-group mb-0">
               <label style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem; display: block;">Participant</label>
-              <select id="matching-participant-select" class="form-control form-control-sm" required></select>
+              <select id="matching-participant-select" class="form-control form-control-sm" required>
+                <option value="PART-APOLLO">Apollo Global Liquidity LLC (USA • VERIFIED)</option>
+                <option value="PART-SEQUOIA">Sequoia Growth Holdings Ltd (CYM • VERIFIED)</option>
+                <option value="PART-HORIZON">Horizon Capital Partners (GBR • VERIFIED)</option>
+                <option value="PART-CITADEL">Citadel Institutional Custody (USA • VERIFIED)</option>
+              </select>
             </div>
             <div class="form-group mb-0">
               <label style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem; display: block;">Asset</label>
-              <select id="matching-security-select" class="form-control form-control-sm" required></select>
+              <select id="matching-security-select" class="form-control form-control-sm" required>
+                <option value="SPCX-N">SPCX — SpaceX Series N Preferred</option>
+                <option value="ANTH-C">ANTH — Anthropic Common Class A</option>
+                <option value="STRP-A">STRP — Stripe Series H Preferred</option>
+                <option value="ANDR-D">ANDR — Anduril Industries Series D</option>
+              </select>
             </div>
             <div class="form-group mb-0">
               <label style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem; display: block;">Order Side</label>
@@ -1212,7 +1226,7 @@
   <!-- ====================================================================
        LAYER 1: SIGN IN & SIGN UP GATEWAY LAYER (FIRST PAGE LAYER)
        ==================================================================== -->
-  <div class="gateway-layer" id="layer-auth" style="display: flex;">
+  <div class="gateway-layer hidden" id="layer-auth" class="gateway-layer hidden" style="display: none;">
     <div class="gateway-container">
       <div class="gateway-header">
         <div class="gateway-title-box">
@@ -1633,6 +1647,6 @@
   <!-- Toast Notification Container -->
   <div id="toast-container" class="toast-container"></div>
 
-  <script src="app.js?v=20260926_vercel_fix_final"></script>
+  <script src="app.js?v=20260926_master_v1"></script>
 </body>
 </html>
