@@ -3,18 +3,41 @@ import { handler } from '../gox-platform/src/server.js';
 export default async function (req, res) {
   // Enable CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
 
   if (req.method === 'OPTIONS') {
-    res.statusCode = 200;
+    res.statusCode = 204;
     return res.end();
   }
 
-  // Restore original /v1/... route if rewritten by Vercel
-  const matchedPath = req.headers['x-matched-path'] || req.headers['x-forwarded-uri'] || req.headers['x-invoke-path'];
-  if (matchedPath && matchedPath.startsWith('/v1')) {
-    req.url = matchedPath;
+  // Robust path resolution for Vercel Serverless Functions
+  try {
+    const rawUrl = req.url || '/';
+    const parsed = new URL(rawUrl, `http://${req.headers.host || 'localhost'}`);
+    
+    // 1. Check query parameter ?path=... or ?route=...
+    const qPath = parsed.searchParams.get('path') || parsed.searchParams.get('route') || (req.query && (req.query.path || req.query.route));
+    
+    // 2. Check Vercel routing headers
+    const forwardedUri = req.headers['x-forwarded-uri'] || 
+                         req.headers['x-matched-path'] || 
+                         req.headers['x-invoke-path'] ||
+                         req.headers['x-real-path'];
+
+    if (qPath) {
+      let cleanPath = Array.isArray(qPath) ? qPath.join('/') : qPath;
+      if (!cleanPath.startsWith('/')) cleanPath = '/' + cleanPath;
+      req.url = cleanPath;
+    } else if (forwardedUri && (forwardedUri.startsWith('/v1') || forwardedUri.startsWith('/health'))) {
+      req.url = forwardedUri;
+    } else if (req.url.startsWith('/api/v1')) {
+      req.url = req.url.replace('/api/v1', '/v1');
+    } else if (req.url === '/api' || req.url === '/api/' || req.url === '/') {
+      req.url = '/v1/overview';
+    }
+  } catch (e) {
+    console.error('URL parse error in api/index.js:', e);
   }
 
   try {

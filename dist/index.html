@@ -675,33 +675,33 @@
             <!-- Asset Filter -->
             <div style="display: flex; align-items: center; gap: 0.35rem;">
               <label for="filter-matching-asset" style="font-size: 0.75rem; color: var(--text-muted); margin: 0; text-transform: uppercase;">Filter Asset:</label>
-              <select id="filter-matching-asset" class="form-control form-control-sm" style="width: 140px; padding: 0.25rem 0.5rem; font-size: 0.8rem; background: var(--bg-secondary);">
+              <select id="filter-matching-asset" onchange="window.filterMatchingByAsset(this.value)" class="form-control form-control-sm" style="width: 140px; padding: 0.25rem 0.5rem; font-size: 0.8rem; background: var(--bg-secondary);">
                 <option value="ALL">All Assets</option>
               </select>
             </div>
 
             <!-- Run Matching Engine -->
-            <button class="btn btn-sm btn-primary" id="btn-trigger-match" title="Cross overlapping orders in the order book">
+            <button class="btn btn-sm btn-primary" id="btn-trigger-match" onclick="window.runMatchingEngine()" title="Cross overlapping orders in the order book">
               <span class="btn-icon">⚡</span> Run Matching Engine
             </button>
 
             <!-- Quick Crossing Trade Simulation -->
-            <button class="btn btn-sm btn-secondary" id="btn-quick-cross" title="Generate crossing buy & sell orders and immediately match them">
+            <button class="btn btn-sm btn-secondary" id="btn-quick-cross" onclick="window.runQuickCross()" title="Generate crossing buy & sell orders and immediately match them">
               <span class="btn-icon">🎯</span> Quick Crossing Trade
             </button>
 
             <!-- Toggle Place Order Panel -->
-            <button class="btn btn-sm btn-outline" id="btn-toggle-order-drawer" title="Open or close order entry panel">
+            <button class="btn btn-sm btn-outline" id="btn-toggle-order-drawer" onclick="window.toggleOrderDrawer()" title="Open or close order entry panel">
               <span class="btn-icon">➕</span> Place Order
             </button>
 
             <!-- Cancel All Open Orders -->
-            <button class="btn btn-sm btn-ghost text-danger" id="btn-cancel-all-orders" title="Cancel all open and partially filled orders">
+            <button class="btn btn-sm btn-ghost text-danger" id="btn-cancel-all-orders" onclick="window.cancelAllOrders()" title="Cancel all open and partially filled orders">
               <span class="btn-icon">✕</span> Cancel All
             </button>
 
             <!-- Refresh Button -->
-            <button class="btn btn-sm btn-ghost" id="btn-refresh-matching" title="Refresh order book and trade executions">
+            <button class="btn btn-sm btn-ghost" id="btn-refresh-matching" onclick="window.refreshMatchingData()" title="Refresh order book and trade executions">
               <span class="btn-icon">↺</span> Refresh
             </button>
           </div>
@@ -1633,6 +1633,6 @@
   <!-- Toast Notification Container -->
   <div id="toast-container" class="toast-container"></div>
 
-  <script src="app.js?v=20260926_7"></script>
+  <script src="app.js?v=20260926_vercel_fix_final"></script>
 </body>
 </html>
