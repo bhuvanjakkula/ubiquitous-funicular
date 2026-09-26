@@ -46,7 +46,8 @@ let state = {
 };
 window.state = state;
 
-// matchingSelectedSide initialized at top
+let matchingSelectedSide = 'BUY';
+window.matchingSelectedSide = matchingSelectedSide;
 
 // Colors for Cap Table Distribution Visualizer
 const CAP_COLORS = [
@@ -1272,15 +1273,16 @@ async function loadOrders() {
 
 window.cancelOrder = async (orderId) => {
   try {
-    const res = await fetch(`${API_BASE}/v1/orders/${orderId}/cancel`, { method: 'POST' });
-    if (res.ok) {
-      showToast(`Order ${orderId.substring(0, 8)} canceled successfully`, 'warning');
-      await refreshAllData();
-      await loadOrders();
-    } else {
-      const err = await res.json();
-      showToast(`Cancel Failed: ${err.error || 'Unable to cancel order'}`, 'danger');
-    }
+    const orders = state.orders || [];
+    const target = orders.find(o => o.id === orderId);
+    if (target) target.status = 'CANCELED';
+    state.orders = orders;
+    saveStoredOrders(orders);
+
+    showToast(`Order ${orderId.substring(0, 8)} canceled successfully`, 'warning');
+    await loadOrders();
+
+    await fetch(`${API_BASE}/v1/orders/${orderId}/cancel`, { method: 'POST' }).catch(() => {});
   } catch (e) {
     showToast(e.message, 'danger');
   }
@@ -1368,107 +1370,16 @@ async function loadTrades() {
 
 
 
-// "Cancel All" Button Click Handler
-const btnCancelAll = document.getElementById('btn-cancel-all-orders');
-if (btnCancelAll) {
-  btnCancelAll.addEventListener('click', async () => {
-    if (confirm('Cancel all active and partially filled orders in the order book?')) {
-      await cancelAllOrders();
-    }
-  });
-}
-
-// "Refresh" Button Click Handler
-const btnRefreshMatching = document.getElementById('btn-refresh-matching');
-if (btnRefreshMatching) {
-  btnRefreshMatching.addEventListener('click', async () => {
-    await refreshAllData();
-    await loadOrders();
-    await loadTrades();
-    showToast('Liquidity order book and trade executions refreshed', 'info');
-  });
-}
-
-// Asset Filter Dropdown in Liquidity Matching
-const filterMatchingAsset = document.getElementById('filter-matching-asset');
-if (filterMatchingAsset) {
-  filterMatchingAsset.addEventListener('change', (e) => {
-    state.matchingFilterAsset = e.target.value;
-    loadOrders();
-    loadTrades();
-  });
-}
-
-// Order Status Filter Buttons (All, Open, Filled)
-['btn-filter-orders-all', 'btn-filter-orders-open', 'btn-filter-orders-filled'].forEach(id => {
-  const btn = document.getElementById(id);
-  if (btn) {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-order-status-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.matchingFilterStatus = btn.dataset.status;
-      loadOrders();
-    });
-  }
-});
-
-// Toggle Order Entry Drawer
-const btnToggleDrawer = document.getElementById('btn-toggle-order-drawer');
-const matchingOrderCard = document.getElementById('matching-order-card');
-const btnCloseOrderCard = document.getElementById('btn-close-order-card');
-
-if (btnToggleDrawer && matchingOrderCard) {
-  btnToggleDrawer.addEventListener('click', () => {
-    const isHidden = matchingOrderCard.style.display === 'none';
-    matchingOrderCard.style.display = isHidden ? 'block' : 'none';
-    btnToggleDrawer.classList.toggle('active', isHidden);
-  });
-}
-
-if (btnCloseOrderCard && matchingOrderCard) {
-  btnCloseOrderCard.addEventListener('click', () => {
-    matchingOrderCard.style.display = 'none';
-    if (btnToggleDrawer) btnToggleDrawer.classList.remove('active');
-  });
-}
-
-// Matching Order Side Selector (BUY / SELL)
-let matchingSelectedSide = 'BUY';
-const btnMatchSideBuy = document.getElementById('btn-matching-side-buy');
-const btnMatchSideSell = document.getElementById('btn-matching-side-sell');
-
-if (btnMatchSideBuy && btnMatchSideSell) {
-  btnMatchSideBuy.addEventListener('click', () => {
-    matchingSelectedSide = 'BUY';
-    btnMatchSideBuy.className = 'btn btn-sm btn-success flex-1';
-    btnMatchSideBuy.style.opacity = '1';
-    btnMatchSideSell.className = 'btn btn-sm btn-outline flex-1';
-    btnMatchSideSell.style.opacity = '0.6';
-  });
-
-  btnMatchSideSell.addEventListener('click', () => {
-    matchingSelectedSide = 'SELL';
-    btnMatchSideSell.className = 'btn btn-sm btn-danger flex-1';
-    btnMatchSideSell.style.opacity = '1';
-    btnMatchSideBuy.className = 'btn btn-sm btn-outline flex-1';
-    btnMatchSideBuy.style.opacity = '0.6';
-  });
-}
-
-// Auto-update estimated notional in matching order form
-function updateMatchingOrderNotional() {
+// Liquidity matching helpers & live notional calculator
+window.updateMatchingOrderNotional = function() {
   const price = parseFloat(document.getElementById('matching-order-price')?.value) || 0;
   const qty = parseInt(document.getElementById('matching-order-qty')?.value) || 0;
   const notionalEl = document.getElementById('matching-order-notional');
   if (notionalEl) {
-    notionalEl.textContent = `$${(price * qty).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    notionalEl.textContent = '$' + (price * qty).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
-}
+};
 
-document.getElementById('matching-order-price')?.addEventListener('input', updateMatchingOrderNotional);
-document.getElementById('matching-order-qty')?.addEventListener('input', updateMatchingOrderNotional);
-
-// Handled via window.handleMatchingOrderSubmit
 
 window.initiateDvPFromTrade = async (tradeId, securityId, quantity, priceMinor, buyerId, sellerId) => {
   try {
@@ -2688,6 +2599,7 @@ function initAuthAndPricingLayer() {
     });
   }
 }
+
 
 
 
