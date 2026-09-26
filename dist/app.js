@@ -2332,40 +2332,58 @@ function initAuthAndPricingLayer() {
     }
   };
 
+  window.enterPlatform = () => {
+    loginAsOwnerBypass();
+  };
+
+  window.signOut = () => {
+    sessionStorage.removeItem('gox_session_active');
+    localStorage.removeItem('gox_current_user');
+    localStorage.removeItem('gox_token');
+    window.showLayer1();
+    showToast('Signed out. Welcome to GOX Gateway.', 'info');
+  };
+
   const layerAuth = document.getElementById('layer-auth');
   const layerPricing = document.getElementById('layer-pricing');
 
-  // If user is owner, they are ALWAYS accessible without paying any subscription!
-  const isStoredOwner = storedUser && storedUser.email && storedUser.email.toLowerCase() === OWNER_EMAIL.toLowerCase();
-
-  // Always unlock trading dashboard directly for seamless institutional access
-  if (!storedUser || (storedUser.email && storedUser.email.toLowerCase() === OWNER_EMAIL.toLowerCase())) {
-    storedUser = {
-      id: 'USR-OWNER-01',
-      email: OWNER_EMAIL,
-      name: 'Executive',
-      role: 'OWNER',
-      roles: ['OWNER', 'SUPER_ADMIN', 'ADMIN', 'COMPLIANCE'],
-      plan: 'OWNER_PRO',
-      planName: 'Enterprise',
-      planPriceUSD: 0,
-      isOwner: true,
-      hasPaid: true,
-      status: 'VERIFIED'
-    };
-    sessionStorage.setItem('gox_session_active', 'true');
-    localStorage.setItem('gox_current_user', JSON.stringify(storedUser));
-    localStorage.setItem('gox_token', 'bypass-session-token');
+  // Pre-fill owner email for convenience
+  const sInput = document.getElementById('signin-email');
+  if (sInput && !sInput.value) {
+    sInput.value = OWNER_EMAIL;
   }
 
-  updateUserDisplay(storedUser);
-  if (layerAuth) {
-    layerAuth.classList.add('hidden');
-    layerAuth.style.display = 'none';
-  }
-  if (layerPricing) {
-    layerPricing.classList.add('hidden');
-    layerPricing.style.display = 'none';
+  // Check if session is already active
+  const hasActiveSession = sessionStorage.getItem('gox_session_active') === 'true';
+  if (hasActiveSession) {
+    if (!storedUser) {
+      storedUser = {
+        id: 'USR-OWNER-01',
+        email: OWNER_EMAIL,
+        name: 'Executive',
+        role: 'OWNER',
+        roles: ['OWNER', 'SUPER_ADMIN', 'ADMIN', 'COMPLIANCE'],
+        plan: 'OWNER_PRO',
+        planName: 'Enterprise',
+        planPriceUSD: 0,
+        isOwner: true,
+        hasPaid: true,
+        status: 'VERIFIED'
+      };
+      localStorage.setItem('gox_current_user', JSON.stringify(storedUser));
+    }
+    updateUserDisplay(storedUser);
+    if (layerAuth) {
+      layerAuth.classList.add('hidden');
+      layerAuth.style.display = 'none';
+    }
+    if (layerPricing) {
+      layerPricing.classList.add('hidden');
+      layerPricing.style.display = 'none';
+    }
+  } else {
+    // Show First Web Page Layer (Sign In / Sign Up Gateway)
+    window.showLayer1();
   }
 
   // Tab switching between Sign In and Sign Up

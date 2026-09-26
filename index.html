@@ -52,11 +52,13 @@
     <!-- Header Actions -->
     <div class="header-actions">
       <!-- Quick Layer Nav Switchers -->
-      <button type="button" class="btn btn-xs btn-outline" id="btn-nav-layer1" onclick="showLayer1()" style="border-color: rgba(56, 189, 248, 0.4); color: var(--accent-cyan);">
-        🔐 1st Layer: Sign In / Sign Up
+      <button type="button" class="btn btn-xs btn-outline" id="btn-nav-layer1" onclick="window.showLayer1()" style="border-color: rgba(56, 189, 248, 0.5); color: var(--accent-cyan); font-weight: 700;">
+        <span>🔐</span> Layer 1: Auth Gate
       </button>
-      <button type="button" class="btn btn-xs btn-outline" id="btn-nav-layer2" onclick="showLayer2()" style="border-color: rgba(99, 102, 241, 0.4); color: #a5b4fc;">
-        💳 2nd Layer: Pricing Models ($299 / $999 / $9,000)
+      <button type="button" class="btn btn-xs btn-outline" id="btn-nav-layer2" >
+      </button>
+      <button type="button" class="btn btn-xs btn-ghost text-muted" id="btn-nav-signout" onclick="window.signOut()">Sign Out onclick="window.showLayer2()" style="border-color: rgba(99, 102, 241, 0.5); color: #a5b4fc; font-weight: 700;">
+        <span>💳</span> Layer 2: Pricing Models
       </button>
       <!-- User Profile Badge & Membership -->
       <div id="header-user-badge" class="header-user-badge" style="cursor: pointer;" title="Institutional Account">
@@ -1276,7 +1278,7 @@
   <!-- ====================================================================
        LAYER 1: SIGN IN & SIGN UP GATEWAY LAYER (FIRST PAGE LAYER)
        ==================================================================== -->
-  <div class="gateway-layer hidden" id="layer-auth" style="display: none !important;">
+  <div class="gateway-layer" id="layer-auth">
     <div class="gateway-container">
       <div class="gateway-header">
         <div class="gateway-title-box">
@@ -1363,7 +1365,10 @@
                 <input type="password" id="signin-password" class="form-control" placeholder="••••••••••••">
               </div>
 
-              <button type="submit" class="btn btn-primary btn-block mt-3" id="btn-submit-signin">
+              <button type="button" class="btn btn-sm btn-outline mb-2" id="btn-auth-instant-owner" onclick="window.enterPlatform()" style="width: 100%; border-color: rgba(56, 189, 248, 0.5); color: var(--accent-cyan); background: rgba(56, 189, 248, 0.08); font-weight: 700;">
+                ⚡ Instant Owner / Executive Access (bhuvanjakkula@gmail.com)
+              </button>
+              <button type="submit" class="btn btn-primary btn-block mt-1" id="btn-submit-signin">
                 <span class="btn-icon">🔐</span> Sign In to Platform
               </button>
 
@@ -1429,7 +1434,7 @@
   <!-- ====================================================================
        LAYER 2: PRO CUSTOMERS & FIRM SUBSCRIPTION PRICING LAYER ($299 / $999)
        ==================================================================== -->
-  <div class="gateway-layer hidden" id="layer-pricing" style="display: none !important;">
+  <div class="gateway-layer hidden" id="layer-pricing" style="display: none;">
     <div class="gateway-container" style="max-width: 1180px;">
       <div class="gateway-header">
         <div class="gateway-title-box">
@@ -1445,7 +1450,10 @@
             <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0;">Transparent monthly subscription tiers for private market participants</p>
           </div>
         </div>
-        <button type="button" class="btn btn-xs btn-ghost" id="btn-close-pricing">✕ Return to Exchange</button>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <button type="button" class="btn btn-xs btn-outline" onclick="window.showLayer1()" style="color: var(--accent-cyan); border-color: rgba(56, 189, 248, 0.4);">← First Layer (Auth)</button>
+          <button type="button" class="btn btn-xs btn-primary" id="btn-close-pricing" onclick="window.enterPlatform()">Enter Platform ➔</button>
+        </div>
       </div>
 
       <div class="gateway-body">
