@@ -5,12 +5,12 @@ console.log('--- GOX Platform Universal Build Started ---');
 
 const findFile = (filename) => {
   const searchPaths = [
-    filename,
     path.join('gox-platform/src/static', filename),
-    path.join('src/static', filename),
-    path.join('static', filename),
     path.join('../gox-platform/src/static', filename),
     path.join('../../gox-platform/src/static', filename),
+    path.join('src/static', filename),
+    path.join('static', filename),
+    filename,
     path.join('../', filename),
     path.join('../../', filename)
   ];
@@ -32,6 +32,8 @@ const outputDirs = [
   '../public',
   'web/dist',
   'web/public',
+  'web/web/dist',
+  'web/web/public',
   'web'
 ];
 
