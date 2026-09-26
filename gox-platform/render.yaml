@@ -3,7 +3,7 @@ services:
     name: gox-platform
     env: node
     plan: free
-    buildCommand: cd gox-platform && npm test
+    buildCommand: npm run build && npm test
     startCommand: node gox-platform/src/server.js
     envVars:
       - key: NODE_VERSION
