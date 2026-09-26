@@ -1,12 +1,8 @@
 {
-  "version": 2,
-  "framework": null,
-  "public": true,
-  "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/v1/(.*)",
-      "destination": "/api/index.js"
+      "source": "/v1/:path*",
+      "destination": "/api"
     }
   ]
 }

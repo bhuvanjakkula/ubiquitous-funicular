@@ -1,7 +1,7 @@
 import { handler } from '../gox-platform/src/server.js';
 
 export default async function (req, res) {
-  // Enable CORS
+  // Enable CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -11,5 +11,11 @@ export default async function (req, res) {
     return res.end();
   }
 
-  return handler(req, res);
+  try {
+    return await handler(req, res);
+  } catch (err) {
+    res.statusCode = 500;
+    res.setHeader('Content-Type', 'application/json');
+    return res.end(JSON.stringify({ error: err.message || 'INTERNAL_ERROR' }));
+  }
 }
