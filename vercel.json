@@ -1,6 +1,8 @@
 {
   "version": 2,
   "name": "gox-platform",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "builds": [
     {
       "src": "api/index.js",
@@ -9,8 +11,20 @@
   ],
   "routes": [
     {
+      "src": "/style.css",
+      "dest": "/style.css"
+    },
+    {
+      "src": "/app.js",
+      "dest": "/app.js"
+    },
+    {
+      "src": "/v1/(.*)",
+      "dest": "/api/index.js"
+    },
+    {
       "src": "/(.*)",
-      "dest": "api/index.js"
+      "dest": "/api/index.js"
     }
   ]
 }
