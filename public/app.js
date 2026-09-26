@@ -1,3 +1,11 @@
+
+function safeOn(id, event, handler) {
+  const el = typeof id === 'string' ? document.getElementById(id) : id;
+  if (el) {
+    el.addEventListener(event, handler);
+  }
+}
+
 /**
  * GOX — Global Ownership Exchange
  * Frontend Institutional Client Controller
@@ -321,7 +329,7 @@ window.flagParticipant = async (id) => {
 // -------------------------------------------------------------
 // Component 2: Compliance Engine
 // -------------------------------------------------------------
-document.getElementById('form-compliance-eval').addEventListener('submit', async (e) => {
+safeOn('form-compliance-eval', 'submit', async (e) => {
   e.preventDefault();
   const buyerId = document.getElementById('comp-buyer-select').value;
   const sellerId = document.getElementById('comp-seller-select').value;
@@ -614,7 +622,7 @@ window.openTransferFor = (ownerId) => {
   toggleModal('modal-manual-transfer');
 };
 
-document.getElementById('captable-issuer-filter').addEventListener('change', loadCapTable);
+safeOn('captable-issuer-filter', 'change', loadCapTable);
 
 // -------------------------------------------------------------
 // Component 6: Pricing & Depth Ladder
@@ -668,19 +676,19 @@ async function loadPricingStats() {
   document.getElementById('ref-vwap').textContent = stats.vwap ? `$${(stats.vwap / 100).toFixed(2)}` : '--';
 }
 
-document.getElementById('pricing-security-select').addEventListener('change', () => {
+safeOn('pricing-security-select', 'change', () => {
   loadDepthLadder();
   loadPricingStats();
 });
 
-document.getElementById('btn-refresh-depth').addEventListener('click', () => {
+safeOn('btn-refresh-depth', 'click', () => {
   loadDepthLadder();
   loadPricingStats();
   showToast('L2 Depth ladder refreshed', 'info');
 });
 
 // Order Placement Form
-document.getElementById('form-place-order').addEventListener('submit', async (e) => {
+safeOn('form-place-order', 'submit', async (e) => {
   e.preventDefault();
   const participantId = document.getElementById('order-participant-select').value;
   const securityId = document.getElementById('pricing-security-select').value;
@@ -844,7 +852,7 @@ async function loadTrades() {
 }
 
 // "Run Matching Engine" Button Click Handler
-document.getElementById('btn-trigger-match').addEventListener('click', async () => {
+safeOn('btn-trigger-match', 'click', async () => {
   try {
     const targetAsset = state.matchingFilterAsset && state.matchingFilterAsset !== 'ALL' 
       ? state.matchingFilterAsset 
@@ -1295,7 +1303,7 @@ async function loadAuditChain() {
   `).join('');
 }
 
-document.getElementById('btn-reverify-audit-chain').addEventListener('click', async () => {
+safeOn('btn-reverify-audit-chain', 'click', async () => {
   try {
     const res = await fetch(`${API_BASE}/v1/audit/verify`);
     const result = await res.json();
@@ -1321,7 +1329,7 @@ document.getElementById('btn-reverify-audit-chain').addEventListener('click', as
 // -------------------------------------------------------------
 function initFormHandlers() {
   // Register Participant
-  document.getElementById('form-register-participant').addEventListener('submit', async (e) => {
+  safeOn('form-register-participant', 'submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('part-name').value;
     const entityType = document.getElementById('part-type').value;
@@ -1347,7 +1355,7 @@ function initFormHandlers() {
   });
 
   // Register Security
-  document.getElementById('form-register-security').addEventListener('submit', async (e) => {
+  safeOn('form-register-security', 'submit', async (e) => {
     e.preventDefault();
     const symbol = document.getElementById('sec-symbol').value.toUpperCase();
     const name = document.getElementById('sec-name').value;
@@ -1382,7 +1390,7 @@ function initFormHandlers() {
   });
 
   // Configure Policy
-  document.getElementById('form-configure-policy').addEventListener('submit', async (e) => {
+  safeOn('form-configure-policy', 'submit', async (e) => {
     e.preventDefault();
     const securityId = document.getElementById('policy-sec-select').value;
     const allowedRaw = document.getElementById('policy-allowed-countries').value;
@@ -1420,7 +1428,7 @@ function initFormHandlers() {
   });
 
   // Manual Cap Table Transfer
-  document.getElementById('form-manual-transfer').addEventListener('submit', async (e) => {
+  safeOn('form-manual-transfer', 'submit', async (e) => {
     e.preventDefault();
     const issuerId = document.getElementById('transfer-issuer-select').value;
     const from = document.getElementById('transfer-from-select').value;
@@ -1474,7 +1482,7 @@ function initFormHandlers() {
 // -------------------------------------------------------------
 function initActionButtons() {
   // 1-Click Institutional Trade Simulation
-  document.getElementById('btn-run-sim').addEventListener('click', async () => {
+  safeOn('btn-run-sim', 'click', async () => {
     const btn = document.getElementById('btn-run-sim');
     btn.disabled = true;
     btn.innerHTML = `<span class="btn-icon">⏳</span> Orchestrating Deal...`;
@@ -1519,7 +1527,7 @@ function initActionButtons() {
   });
 
   // Verify Audit Chain
-  document.getElementById('btn-verify-audit').addEventListener('click', async () => {
+  safeOn('btn-verify-audit', 'click', async () => {
     const res = await fetch(`${API_BASE}/v1/audit/verify`);
     const r = await res.json();
     if (r.valid) {
@@ -1530,7 +1538,7 @@ function initActionButtons() {
   });
 
   // Reset Demo Data
-  document.getElementById('btn-reset-data').addEventListener('click', async () => {
+  safeOn('btn-reset-data', 'click', async () => {
     if (confirm('Reset platform data to clean genesis state?')) {
       const res = await fetch(`${API_BASE}/v1/simulator/reset`, { method: 'POST' });
       if (res.ok) {
@@ -1579,7 +1587,7 @@ function initSecurityDesk() {
       }
     });
 
-    document.getElementById('btn-test-decrypt').addEventListener('click', async () => {
+    safeOn('btn-test-decrypt', 'click', async () => {
       if (!currentEncryptedPayload) return;
       try {
         const res = await fetch(`${API_BASE}/v1/security/decrypt`, {
@@ -1598,7 +1606,7 @@ function initSecurityDesk() {
       }
     });
 
-    document.getElementById('btn-test-tamper').addEventListener('click', async () => {
+    safeOn('btn-test-tamper', 'click', async () => {
       if (!currentEncryptedPayload) return;
       try {
         // Alter 1 byte in ciphertext to simulate MITM tampering
@@ -1649,7 +1657,7 @@ function initSecurityDesk() {
       }
     });
 
-    document.getElementById('btn-verify-sig').addEventListener('click', async () => {
+    safeOn('btn-verify-sig', 'click', async () => {
       if (!currentSignedWebhook) return;
       try {
         const res = await fetch(`${API_BASE}/v1/security/verify-signature`, {
@@ -1673,7 +1681,7 @@ function initSecurityDesk() {
       }
     });
 
-    document.getElementById('btn-replay-sig').addEventListener('click', async () => {
+    safeOn('btn-replay-sig', 'click', async () => {
       if (!currentSignedWebhook) return;
       try {
         // Re-submit the exact same nonce and signature (Replay Attack)
@@ -2301,3 +2309,21 @@ function initAuthAndPricingLayer() {
   }
 }
 
+
+
+// Explicit Window Bindings for Inline HTML Callbacks
+window.switchTab = typeof switchTab !== 'undefined' ? switchTab : window.switchTab;
+window.toggleModal = typeof toggleModal !== 'undefined' ? toggleModal : window.toggleModal;
+window.verifyParticipant = typeof verifyParticipant !== 'undefined' ? verifyParticipant : window.verifyParticipant;
+window.flagParticipant = typeof flagParticipant !== 'undefined' ? flagParticipant : window.flagParticipant;
+window.verifyHolding = typeof verifyHolding !== 'undefined' ? verifyHolding : window.verifyHolding;
+window.cancelOrder = typeof cancelOrder !== 'undefined' ? cancelOrder : window.cancelOrder;
+window.cancelAllOrders = typeof cancelAllOrders !== 'undefined' ? cancelAllOrders : window.cancelAllOrders;
+window.initiateDvPFromTrade = typeof initiateDvPFromTrade !== 'undefined' ? initiateDvPFromTrade : window.initiateDvPFromTrade;
+window.confirmLeg = typeof confirmLeg !== 'undefined' ? confirmLeg : window.confirmLeg;
+window.settleAtomic = typeof settleAtomic !== 'undefined' ? settleAtomic : window.settleAtomic;
+window.viewReceipt = typeof viewReceipt !== 'undefined' ? viewReceipt : window.viewReceipt;
+window.confirmAllLegs = typeof confirmAllLegs !== 'undefined' ? confirmAllLegs : window.confirmAllLegs;
+window.settleAllReady = typeof settleAllReady !== 'undefined' ? settleAllReady : window.settleAllReady;
+window.showLayer1 = typeof showLayer1 !== 'undefined' ? showLayer1 : window.showLayer1;
+window.showLayer2 = typeof showLayer2 !== 'undefined' ? showLayer2 : window.showLayer2;
