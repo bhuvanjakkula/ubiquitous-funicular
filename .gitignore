@@ -16,3 +16,5 @@ ui/dist/
 web/node_modules/
 web/dist/
 web/node_modules-local-link/
+
+node_modules/
