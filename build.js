@@ -10,9 +10,7 @@ const findFile = (filename) => {
     path.join('../../gox-platform/src/static', filename),
     path.join('src/static', filename),
     path.join('static', filename),
-    filename,
-    path.join('../', filename),
-    path.join('../../', filename)
+    filename
   ];
   for (const p of searchPaths) {
     if (fs.existsSync(p)) return fs.readFileSync(p, 'utf8');
@@ -28,13 +26,11 @@ const outputDirs = [
   'dist',
   'public',
   '.',
-  '../dist',
-  '../public',
-  'web/dist',
+  'web',
   'web/public',
-  'web/web/dist',
+  'web/dist',
   'web/web/public',
-  'web'
+  'web/web/dist'
 ];
 
 outputDirs.forEach(dir => {

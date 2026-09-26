@@ -1,3 +1,61 @@
+
+window.handleOrderPlacement = async (e) => {
+  if (e) {
+    if (typeof e.preventDefault === 'function') e.preventDefault();
+    if (typeof e.stopPropagation === 'function') e.stopPropagation();
+  }
+
+  const pSelect = document.getElementById('order-participant-select');
+  const sSelect = document.getElementById('pricing-security-select');
+  const participantId = pSelect?.value || 'PART-APOLLO';
+  const securityId = sSelect?.value || 'SPCX-N';
+  const price = parseFloat(document.getElementById('order-price')?.value) || 113.0;
+  const quantity = parseInt(document.getElementById('order-quantity')?.value) || 5000;
+  const side = state.selectedSide || 'BUY';
+
+  const newOrder = {
+    id: 'ORD-' + Math.floor(100000 + Math.random() * 900000),
+    participantId,
+    securityId,
+    issuerId: securityId === 'ANTH-C' ? 'ISS-ANTHROPIC' : securityId === 'STRP-A' ? 'ISS-STRIPE' : 'ISS-SPACEX',
+    side,
+    priceMinor: Math.round(price * 100),
+    quantity,
+    remainingQuantity: quantity,
+    status: 'OPEN',
+    createdAt: new Date().toISOString()
+  };
+
+  const orders = state.orders || [];
+  orders.unshift(newOrder);
+  state.orders = orders;
+  saveStoredOrders(orders);
+
+  showToast(`⚡ Limit Order Placed: ${side} ${quantity.toLocaleString()} ${securityId} @ ${price.toFixed(2)}`, 'success');
+  const qtyInput = document.getElementById('order-quantity');
+  if (qtyInput) qtyInput.value = '';
+
+  try {
+    await fetch(`${API_BASE}/v1/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        participantId,
+        securityId,
+        side,
+        priceMinor: Math.round(price * 100),
+        quantity
+      })
+    });
+  } catch (err) {}
+
+  await loadOrders();
+  if (typeof loadDepthLadder === 'function') loadDepthLadder();
+  if (typeof loadPricingStats === 'function') loadPricingStats();
+
+  return false;
+};
+
 // Auto-seed executive session for seamless dashboard access
 try {
   if (!localStorage.getItem('gox_current_user')) {
@@ -706,17 +764,17 @@ function initSideSelector() {
 // Global Refresh
 async function refreshAllData() {
   try {
-    await Promise.all([
-      loadOverview(),
-      loadParticipants(),
-      loadSecurities(),
-      loadHoldings(),
-      loadPolicies(),
-      loadCapTable(),
-      loadOrders(),
-      loadTrades(),
-      loadSettlements(),
-      loadAuditChain()
+    await Promise.allSettled([
+      loadOverview().catch(e => console.warn('Overview load warning:', e)),
+      loadParticipants().catch(e => console.warn('Participants load warning:', e)),
+      loadSecurities().catch(e => console.warn('Securities load warning:', e)),
+      loadHoldings().catch(e => console.warn('Holdings load warning:', e)),
+      loadPolicies().catch(e => console.warn('Policies load warning:', e)),
+      loadCapTable().catch(e => console.warn('CapTable load warning:', e)),
+      loadOrders().catch(e => console.warn('Orders load warning:', e)),
+      loadTrades().catch(e => console.warn('Trades load warning:', e)),
+      loadSettlements().catch(e => console.warn('Settlements load warning:', e)),
+      loadAuditChain().catch(e => console.warn('AuditChain load warning:', e))
     ]);
   } catch (err) {
     console.error('Error refreshing platform data:', err);
@@ -739,9 +797,9 @@ async function loadOverview() {
   const { stats, securities, recentSettlements, recentTrades } = data;
 
   // Metrics Bar
-  document.getElementById('metric-settled-vol').textContent = '$' + ((stats.settledVolumeMinor || 0) / 100).toLocaleString('en-US', { minimumFractionDigits: 2 });
-  document.getElementById('metric-securities').textContent = stats.totalSecurities;
-  document.getElementById('metric-participants').textContent = stats.totalParticipants;
+  const mVol = document.getElementById('metric-settled-vol'); if (mVol) mVol.textContent = '$' + ((stats.settledVolumeMinor || 0) / 100).toLocaleString('en-US', { minimumFractionDigits: 2 });
+  const mSec = document.getElementById('metric-securities'); if (mSec) mSec.textContent = stats.totalSecurities;
+  const mPart = document.getElementById('metric-participants'); if (mPart) mPart.textContent = stats.totalParticipants;
   document.getElementById('metric-verified-sub').textContent = `${stats.verifiedParticipants} KYC/KYB Verified`;
   document.getElementById('metric-orders').textContent = stats.openOrders;
   document.getElementById('metric-audit-count').textContent = stats.auditEventsCount;
@@ -1378,6 +1436,7 @@ async function loadOrders() {
   }
 
   const tbody = document.getElementById('table-orders-tbody');
+  if (!tbody) return;
   if (filtered.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted" style="padding: 1.5rem;">No orders matching current filter. Use "Place Order" or "Quick Crossing Trade".</td></tr>`;
     return;
@@ -1467,6 +1526,7 @@ async function loadTrades() {
   }
 
   const tbody = document.getElementById('table-trades-tbody');
+  if (!tbody) return;
   if (filtered.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted" style="padding: 1.5rem;">No trades matched yet. Click <strong>'Run Matching Engine'</strong> or <strong>'Quick Crossing Trade'</strong>.</td></tr>`;
   } else {

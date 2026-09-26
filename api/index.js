@@ -1,6 +1,18 @@
 import { handler } from '../gox-platform/src/server.js';
 
 export default async function (req, res) {
+  // Ensure writeHead polyfill exists
+  if (typeof res.writeHead !== 'function') {
+    res.writeHead = (statusCode, headers) => {
+      res.statusCode = statusCode;
+      if (headers) {
+        for (const [k, v] of Object.entries(headers)) {
+          try { res.setHeader(k, v); } catch (e) {}
+        }
+      }
+      return res;
+    };
+  }
   // Enable CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH');
